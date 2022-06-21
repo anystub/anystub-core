@@ -50,7 +50,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build and analyze
-        if: ${{ github.ref != 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/main' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=anystub_anystub-core
 
       - name: Prep-Release with Maven
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -71,10 +71,10 @@ jobs:
         run: |
           git config --global user.email "andreev.kirill.o@gmail.com" 
           git config --global user.name "AUTO-COMMIT" 
-          mvn -B release:prepare -DscmCommentPrefix="[skip ci]" -Darguments='-Dgpg.skip=false' org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=org.anystub:anystub
+          mvn -B release:prepare -DscmCommentPrefix="[skip ci]" -Darguments='-Dgpg.skip=false' org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=anystub_anystub-core
 
       - name: Release with Maven
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
