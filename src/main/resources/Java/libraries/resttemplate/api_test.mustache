@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.anystub.mgmt.BaseManagerFactory;
 import org.anystub.DecoderResponseEntity;
 import org.anystub.EncoderResponseEntity;
-import org.anystub.Util;
+import org.anystub.StringUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 
@@ -110,7 +110,7 @@ public class {{classname}}Test extends {{classname}} {
                     .request2(() -> api.{{operationId}}WithHttpInfo({{#allParams}} {{paramName}}{{^-last}}, {{/-last}} {{/allParams}}),
                         new DecoderResponseEntity<{{{.}}}>(new TypeReference<{{{.}}}>(){}),
                         new EncoderResponseEntity<>(),
-                        Util.toArray("{{operationId}}WithHttpInfo" {{#allParams}}, {{paramName}} {{/allParams}}));
+                        StringUtil.toArray("{{operationId}}WithHttpInfo" {{#allParams}}, {{paramName}} {{/allParams}}));
             {{/returnType}}
 
             {{^returnType}}
@@ -118,7 +118,7 @@ public class {{classname}}Test extends {{classname}} {
                     .request2(() -> api.{{operationId}}WithHttpInfo({{#allParams}} {{paramName}}{{^-last}}, {{/-last}} {{/allParams}}),
                         new DecoderResponseEntity<Void>(new TypeReference<Void>(){}),
                         new EncoderResponseEntity<>(),
-                        Util.toArray("{{operationId}}WithHttpInfo" {{#allParams}}, {{paramName}} {{/allParams}}));
+                        StringUtil.toArray("{{operationId}}WithHttpInfo" {{#allParams}}, {{paramName}} {{/allParams}}));
             {{/returnType}}
 
          }

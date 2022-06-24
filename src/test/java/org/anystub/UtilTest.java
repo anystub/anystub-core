@@ -3,8 +3,8 @@ package org.anystub;
 
 import org.junit.jupiter.api.Test;
 
-import static org.anystub.Util.escapeCharacterString;
-import static org.anystub.Util.isText;
+import static org.anystub.StringUtil.escapeCharacterString;
+import static org.anystub.StringUtil.isText;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UtilTest {
@@ -38,11 +38,11 @@ public class UtilTest {
     @Test
     public void testToCharacterStringTest() {
         String s;
-        s = Util.toCharacterString("thisistextline".getBytes());
+        s = StringUtil.toCharacterString("thisistextline".getBytes());
         assertEquals("thisistextline", s);
-        s = Util.toCharacterString("BASE".getBytes());
+        s = StringUtil.toCharacterString("BASE".getBytes());
         assertEquals("TEXT BASE", s);
-        s = Util.toCharacterString(("thisistextline" + (char) 0x03).getBytes());
+        s = StringUtil.toCharacterString(("thisistextline" + (char) 0x03).getBytes());
         assertTrue(s.startsWith("BASE64 "));
     }
 

@@ -248,7 +248,7 @@ public class Base {
                 },
                 new DecoderJson<R>(responseClass),
                 new EncoderJson<>(),
-                Util.toArray(keys));
+                StringUtil.toArray(keys));
     }
     /**
      * Requests an object. It looks for a document in a stub file
@@ -292,7 +292,7 @@ public class Base {
                 },
                 d,
                 new EncoderJson<>(),
-                Util.toArray(keys));
+                StringUtil.toArray(keys));
 
 
     }
@@ -341,8 +341,8 @@ public class Base {
     @Deprecated(since = "0.7.0")
     public <T extends Serializable, E extends Exception> T requestSerializable(Supplier<T, E> supplier, String... keys) throws E {
         return request(supplier,
-                Util::decode,
-                Util::encode,
+                StringUtil::decode,
+                StringUtil::encode,
                 keys);
     }
 

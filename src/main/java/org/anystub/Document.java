@@ -274,6 +274,12 @@ public class Document {
     }
 
     public String getKey(int pos) {
+        if (pos>=this.keys.size() || pos < -this.keys.size()) {
+            return "";
+        }
+        if (pos<0) {
+            return this.keys.get(this.keys.size()+pos);
+        }
         return this.keys.get(pos);
     }
 
