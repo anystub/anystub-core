@@ -1,5 +1,6 @@
 package org.anystub;
 
+import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,8 +27,17 @@ public class StringUtil {
     }
 
     public static boolean isText(byte[] symbols) {
-        for (byte b : symbols) {
-            if ((b < 0x20 || b > 0x7E) && (b !=(byte) 0x0A && b != (byte) 0x0D)) {
+        String t = new String(symbols, StandardCharsets.UTF_8);
+        for(char c: t.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                continue;
+            }
+            Character.UnicodeBlock block = Character.UnicodeBlock.of( c );
+            if(block ==null ||
+                block == Character.UnicodeBlock.SPECIALS ||
+                c == KeyEvent.CHAR_UNDEFINED ||
+                Character.isISOControl(c)
+            ) {
                 return false;
             }
         }

@@ -407,7 +407,7 @@ public class Base {
 
 
     /**
-     * Requests an Object which is could be kept in stub-file as a single string
+     * Requests an Object which could be kept in stub-file as a single string
      *
      * @param supplier provide real answer
      * @param decoder  create object from one line
@@ -637,7 +637,7 @@ public class Base {
     }
 
     /**
-     * clears buffer, set isNew to true
+     * clears history and documents, sets isNew to true, which causes loading existing stub-file on the next request
      * doesn't touch appropriate file (a note: just remove a file manually if you do not need the data anymore)
      * doesn't clean properties
      */
