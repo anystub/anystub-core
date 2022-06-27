@@ -97,9 +97,9 @@ public class Document {
     }
 
     public <E extends Throwable> Iterable<String> getVals() throws E {
-        return _getVals();
+        return getValues();
     }
-    private  <E extends Throwable> List<String> _getVals() throws E {
+    private  <E extends Throwable> List<String> getValues() throws E {
         if (exception.isEmpty()) {
             if (isNullValue()) {
                 return null;
@@ -131,7 +131,7 @@ public class Document {
                 pos < -this.values.size()) {
             return "";
         }
-        List<String> strings = _getVals();
+        List<String> strings = getValues();
         if (strings == null) {
             return "";
         }

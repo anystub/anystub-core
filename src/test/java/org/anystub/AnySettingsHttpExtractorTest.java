@@ -85,7 +85,7 @@ class AnySettingsHttpExtractorTest {
     }
 
     @Test
-    public void testDiscoverSettingsClass() {
+    void testDiscoverSettingsClass() {
         AnyStubId s = AnyStubFileLocator.discoverFile();
         AnySettingsHttp anySettingsHttp = AnySettingsHttpExtractor.discoverSettings();
         assertNotNull(anySettingsHttp);
@@ -94,7 +94,7 @@ class AnySettingsHttpExtractorTest {
     }
     @Test
     @AnySettingsHttp(headers = {"test1", "test2"}, allHeaders = false, bodyTrigger = {"http://", "234"})
-    public void testDiscoverSettings1() {
+    void testDiscoverSettings1() {
         AnySettingsHttp anySettingsHttp = AnySettingsHttpExtractor.discoverSettings();
         assertNotNull(anySettingsHttp);
         Object headers = new String[]{"test1", "test2"};
@@ -105,7 +105,7 @@ class AnySettingsHttpExtractorTest {
 
     @Test
     @AnySettingsHttp(headers = {})
-    public void testDiscoverSettings2() {
+    void testDiscoverSettings2() {
         AnySettingsHttp anySettingsHttp = AnySettingsHttpExtractor.discoverSettings();
         assertNotNull(anySettingsHttp);
         Object headers = new String[]{"test1", "test2"};
