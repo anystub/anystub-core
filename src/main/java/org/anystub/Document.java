@@ -99,7 +99,7 @@ public class Document {
     /**
      * returns all values as string
      * if document holds an exception throw the exception
-     * if document is empty (no values, no exceptions) return null
+     * if document is empty (no values, no exceptions) returns null
      * @return
      * @param <E>
      * @throws E
@@ -110,9 +110,9 @@ public class Document {
     private  <E extends Throwable> List<String> getValues() throws E {
         if (exception.isEmpty()) {
             if (isNullValue()) {
-                return List.of();
+                return null;
             }
-            return null;
+            return values;
         }
 
         try {
