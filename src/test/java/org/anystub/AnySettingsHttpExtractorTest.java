@@ -87,6 +87,7 @@ class AnySettingsHttpExtractorTest {
     @Test
     void testDiscoverSettingsClass() {
         AnyStubId s = AnyStubFileLocator.discoverFile();
+        assertNotNull(s);
         AnySettingsHttp anySettingsHttp = AnySettingsHttpExtractor.discoverSettings();
         assertNotNull(anySettingsHttp);
         assertFalse(anySettingsHttp.allHeaders());
