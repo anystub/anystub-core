@@ -194,6 +194,16 @@ public class DocumentTest {
         Assertions.assertEquals("", document.getVal(-10));
     }
 
+    @Test
+    void testGetKey() {
+        Document document = new Document("1", "2", "3", "4");
+
+        Assertions.assertEquals("1", document.getKey(0));
+        Assertions.assertEquals("4", document.getKey(-1));
+        Assertions.assertEquals("", document.getKey(10));
+        Assertions.assertEquals("", document.getKey(-10));
+    }
+
 
     @Test
     void testWrongException() {

@@ -96,15 +96,23 @@ public class Document {
         return getVals().iterator().next();
     }
 
+    /**
+     * returns all values as string
+     * if document holds an exception throw the exception
+     * if document is empty (no values, no exceptions) return null
+     * @return
+     * @param <E>
+     * @throws E
+     */
     public <E extends Throwable> Iterable<String> getVals() throws E {
         return getValues();
     }
     private  <E extends Throwable> List<String> getValues() throws E {
         if (exception.isEmpty()) {
             if (isNullValue()) {
-                return null;
+                return List.of();
             }
-            return values;
+            return null;
         }
 
         try {
