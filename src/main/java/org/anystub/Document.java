@@ -127,8 +127,12 @@ public class Document {
      * @return
      */
     public String getVal(int pos) {
+        if (pos>=this.values.size() ||
+                pos < -this.values.size()) {
+            return "";
+        }
         List<String> strings = _getVals();
-        if (pos>=this.values.size() || pos < -this.values.size()) {
+        if (strings == null) {
             return "";
         }
         if (pos<0) {
