@@ -3,6 +3,7 @@ package org.anystub;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.anystub.HttpGlobalSettings.globalBodyMask;
@@ -28,6 +29,12 @@ public class SettingsUtil {
                 .anyMatch(url::contains);
     }
 
+    /**
+     * combines all available rules from HttpGlobalSettings.globalBodyMask and AnySettingsHttp.bodyMask
+     * and replace match with ellipsis (...). if not rules specified no replacements performed
+     * @param s string to mask
+     * @return masked string
+     */
     public static String maskBody(String s) {
         Set<String> currentBodyMask = new HashSet<>();
 
@@ -41,9 +48,20 @@ public class SettingsUtil {
         if ((settings == null || !settings.overrideGlobal()) && globalBodyMask != null) {
             currentBodyMask.addAll(asList(globalBodyMask));
         }
+        if (currentBodyMask.isEmpty()) {
+            return s;
+        }
 
-        return currentBodyMask.stream()
-                .reduce(s, (r, m) -> r.replaceAll(m, "..."));
+        String combinedRule;
+        if (currentBodyMask.size()>1) {
+            combinedRule = currentBodyMask.stream().
+                    map(r->String.format("(%s)", r))
+                    .collect(Collectors.joining("|"));
+        } else {
+            combinedRule = String.join("", currentBodyMask);
+        }
+
+        return s.replaceAll(combinedRule, "...");
     }
 
 }

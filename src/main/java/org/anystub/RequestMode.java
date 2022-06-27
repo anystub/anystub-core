@@ -46,8 +46,8 @@ public enum RequestMode {
     /**
      * Stub behaves similar to rmNew - if request is missing in stub it sends to the real system.
      * But if real system fails to respond stub will generate a fake object. fake objects saves in stub
-     * Subject to a function
-     * Use case: real system is not available, but API is known
+     * (!) Not supported by all request functions. rmFake works if request function has returning type in arguments
+     * Use case: real system is not available, but API-spec is available
      */
     rmFake
 

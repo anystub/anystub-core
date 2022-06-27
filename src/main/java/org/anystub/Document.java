@@ -96,7 +96,18 @@ public class Document {
         return getVals().iterator().next();
     }
 
+    /**
+     * returns all values as string
+     * if document holds an exception throw the exception
+     * if document is empty (no values, no exceptions) returns null
+     * @return
+     * @param <E>
+     * @throws E
+     */
     public <E extends Throwable> Iterable<String> getVals() throws E {
+        return getValues();
+    }
+    private  <E extends Throwable> List<String> getValues() throws E {
         if (exception.isEmpty()) {
             if (isNullValue()) {
                 return null;
@@ -116,6 +127,26 @@ public class Document {
             throw new RuntimeException(exception.get(1), e);
         }
 
+    }
+
+    /**
+     * returns value of the key on given position
+     * @param pos can be negative, then calculates from the end, -1 points the last element
+     * @return
+     */
+    public String getVal(int pos) {
+        if (pos>=this.values.size() ||
+                pos < -this.values.size()) {
+            return "";
+        }
+        List<String> strings = getValues();
+        if (strings == null) {
+            return "";
+        }
+        if (pos<0) {
+            return strings.get(this.values.size()+pos);
+        }
+        return strings.get(pos);
     }
 
     public boolean keyEqual_to(String... keys) {
@@ -273,7 +304,18 @@ public class Document {
         throw new AssertionError(msg);
     }
 
+    /**
+     * returns value of the key on given position
+     * @param pos can be negative, then calculates from the end, -1 points the last element
+     * @return
+     */
     public String getKey(int pos) {
+        if (pos>=this.keys.size() || pos < -this.keys.size()) {
+            return "";
+        }
+        if (pos<0) {
+            return this.keys.get(this.keys.size()+pos);
+        }
         return this.keys.get(pos);
     }
 
