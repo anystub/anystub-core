@@ -71,6 +71,7 @@ jobs:
         run: |
           git config --global user.email "andreev.kirill.o@gmail.com" 
           git config --global user.name "AUTO-COMMIT" 
+          cat /home/runner/.m2/settings.xml
           mvn -B release:prepare -DscmCommentPrefix="[skip ci]" -Darguments='-Dgpg.skip=false' org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=anystub_anystub-core
 
       - name: Release with Maven
