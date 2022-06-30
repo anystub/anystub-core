@@ -214,9 +214,8 @@ public class Base {
      */
     public <E extends Exception> String request(Supplier<String, E> supplier, String... keys) throws E {
         return request(supplier,
-                values -> values,
-                s -> s,
-                keys);
+                String.class,
+                Arrays.stream(keys).toArray());
     }
 
     /**

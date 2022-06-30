@@ -45,4 +45,10 @@ class StringUtilTest {
 
     }
 
+    @Test
+    void testToArray() {
+        String[] strings = StringUtil.toArray(null, "", "3");
+        Assertions.assertArrayEquals(new String[]{null,"", "3"}, strings);
+    }
+
 }
