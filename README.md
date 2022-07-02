@@ -3,7 +3,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=anystub_anystub-core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=anystub_anystub-core)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.anystub/anystub-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.anystub/anystub-core)
 
-record input/output for tests in java. inspired by vcr for rails
+The library helps you to automatically record and maintain request/response stubs in java tests - what you are missing when use [Wiremock](https://wiremock.org/). Inspired by vcr in RoR.
 
 Install from Maven Central 
 ===
@@ -12,98 +12,129 @@ Install from Maven Central
     <dependency>
       <groupId>org.anystub</groupId>
       <artifactId>anystub</artifactId>
-      <version>0.8.0</version>
+      <version>0.8.2</version>
       <scope>test</scope>
     </dependency>
 ```
 
 
+
 Example
 ===
-you can find the example in test folder of the repository. below the first scenario.
 
-you have `class SourceSystem` which has access to external resources (http access).
+In the example we build 2 layers application. Layer 1 extracts data from an external system, Layer 2 process the response to produce
+some business valuable result.
+
+![Basic application](img/app-descr.png)
+
+We want to write a test for Worker::processedData method. This is not a demo for mockito or wiremock, hence you will not see it here.
+With anystub-core you can create a wrapper for SourceSystem class which intercepts get-calls. In the first ever call the
+wrapper allows to hit the real external system and records response. In the next run of the test the wrapper will reproduce
+the response without calling a real system. Here what you create in your test. 
+
+![Basic application](img/app-descr-test.png)
+
+[Full example and more](https://github.com/anystub/anystub-examples/tree/main/plain2/src/main/java/org/anystub/examples) 
+
 
 ``` java
-public class SourceSystem {
-
-    public String get() throws IOException {
-        URL myURL = new URL("http://localhost:8080/");
-        URLConnection myURLConnection = myURL.openConnection();
-        myURLConnection.connect();
-
-
-        InputStream inputStream = myURLConnection.getInputStream();
-        return new BufferedReader(new InputStreamReader(inputStream))
-                .lines()
-                .collect(Collectors.joining());
+public class SourceSystemImpl implements SourceSystem {
+    @Override
+    public String get(String arg) throws IOException {
+        .....
+        // hit external system
     }
-
-
 }
 ```
 
 You have class Worker which uses SourceSystem to get data from external data source.
 
 ``` java 
-public class Worker {
+ public class Worker {
 
-    private SourceSystem sourceSystem;
+    private final SourceSystem sourceSystem;
 
     public Worker(SourceSystem sourceSystem) {
         this.sourceSystem = sourceSystem;
     }
 
-    public String get() throws IOException {
-        return sourceSystem.get();
+    public String processedData() throws IOException {
+        // work out business valuable result
     }
+
 }
 ```
 
-You want to test the Worker. In your tests you can create a mock for SourceSystem and put some data in the mock. The things become complex when you have several layers between your 'worker' class and your 'source system' and methods for the source system have multiple parameters. 
-After you created the mock of SourceSystem the main task is to collect relavant data and set up right behaviour for it.
-
-Creating mocks is based on extending existing classes/interfaces. You have to create mocks for every important methods of the class to track parameters and results.
+Manual creating of a wrapper for any kind of class is a very unified process. Stub class should have a link to a real
+object to SourceSystem and every method is a call of Base:requestX function with the same arguments. 
 
 ``` java
-public class WorkerEasyTest {
+public class StubSourceSystem implements SourceSystem {
 
-    SourceSystem sourceSystem;
-    Base base;
+    final private SourceSystem realSourceSystem;
 
-    @Before
-    public void createStub()
-    {
-        base = BaseManagerImpl.instance().getBase();
-        sourceSystem = new SourceSystem("http://localhost:8080") {
-            @Override
-            public String get() throws IOException {
-                return base.request(() -> super.get(), "root");
-            }
-        };
+    public StubSourceSystem(SourceSystem realSourceSystem) {
+        this.realSourceSystem = realSourceSystem;
+    }
+
+    @Override
+    public String get(String arg) throws IOException {
+        return BaseManagerFactory
+                .locate()
+                .request(() -> realSourceSystem.get(arg),
+                        arg);
+    }
+}
+
+```
+
+Higher level libraries implement the wrappers for httpClient, JdbcTemplate, RestClient, WebClient, OpenApi generated SDK. 
+So you do not need to repeat it and create stubs on low level. 
+
+The test should include re-creating test application and the actual call:
+
+```
+class WorkerTest {
+
+    Worker worker;
+
+    @BeforeEach
+    void setup() {
+        SourceSystem sourceSystem = new SourceSystemImpl();
+        SourceSystem stubSourceSystem = new StubSourceSystem(sourceSystem);
+        worker = new Worker(stubSourceSystem);
     }
 
     @Test
-    public void testEasy() throws IOException {
+    @AnyStubId
+    void testWorker() throws IOException {
+        String s = worker.processedData();
+        assertTrue(s.contains("Winning isn't everything"));
 
-        Worker worker = new Worker(sourceSystem);
-        assertEquals("fixed", worker.get());
-        assertEquals(1, base.times());
     }
-
 }
 ```
+After running the test you can find a newly created file at src/test/resources/anystub/testWorker.yml. The name is taken 
+from the name of annotated test method.
 
-The class Base keeps key parameters and return values in stub-files. If input parameters exists in the stub it recovers response from the stub-file and omits calling the real external system.
-By default your data is kept in src/test/resources/anystub/stub.yml. 
-`base.request(Supplier<>, String keys..)` looks for stored data in the file. In case the search is successful the found result is returned to the client. In other case Base invokes `super.get()`. After the call Base keeps parameters and returned value in stub-file then returns recovered value.
-Base could keep returned values or exceptions if the call ended up with exception.
-Stub-files allow you to define the behaviour you need manually. The files are yml-files with simple syntax. So you can create it if you do not have access to the external system.
+```
+request0:
+  exception: []
+  keys: worker's arg
+  values: '..."Winning isn''t everything.. It''s the"...'
 
-Base has methods match*() and times*() to analyze data-flow in your tests.
+```
 
-Above we created a wrapper for the method `String get()` which has no parameters and returns String. Anystub provides a convenient way to wrap methods which operate trivial or Serializable types. When methods have parameters of non-trivial types you still need to provide serializers.
+- The wrapper allows to record responses from a real system.
+- First run of the test verifies the full chain
+- Test work against permanent real data which is not changing over time
+- If a test makes multiple calls all the responses go to a single stub-file
+- To update stubs (when a spec of the external system changed) you remove files and restart tests. New stub will be recorded
+- You can manage stubs with the `@AnystubId` annotation - record only new requests, record all requests, create fake responses, 
+prohibit not recorded calls and etc
 
 
-**Further reading**
-
+Following reading:
+- Apache HttpClient, RestTemplate, JdbcTemplate, OpenApi (anystub)[https://github.com/anystub/anystub]
+- WebClient (anystub-reactive)[https://github.com/anystub/anystub-reactive]
+- System tests with spring-boot (anystub-examples)[https://github.com/anystub/anystub-examples]
