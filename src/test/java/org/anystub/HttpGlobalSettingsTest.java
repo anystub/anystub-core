@@ -2,14 +2,8 @@ package org.anystub;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HttpGlobalSettingsTest {
 
@@ -56,6 +50,8 @@ class HttpGlobalSettingsTest {
         load = HttpGlobalSettings.load("src/test/resources/test4.yml");
         assertNotNull(load);
         load = HttpGlobalSettings.load("src/test/resources/test5.yml");
+        assertNotNull(load);
+        load = HttpGlobalSettings.load("src/test/resources/test-badyml.yml");
         assertNotNull(load);
 
     }
