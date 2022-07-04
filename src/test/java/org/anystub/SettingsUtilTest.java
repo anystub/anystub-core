@@ -13,26 +13,21 @@ class SettingsUtilTest {
     @AnyStubId
     @AnySettingsHttp(bodyTrigger = "local")
     void bodyRuleTest() {
-        HttpGlobalSettings.globalBodyTrigger = new String[]{"global"};
-
         boolean local_glo = SettingsUtil.matchBodyRule("local glo");
         assertTrue(local_glo);
     }
 
     @Test
     @AnyStubId
-    @AnySettingsHttp(bodyTrigger = "local")
+    @AnySettingsHttp(bodyTrigger = "local", bodyMask = "xxx")
     void maskBodyTest() {
-        HttpGlobalSettings.globalBodyMask = new String[]{"xxx"};
-
         String masked = SettingsUtil.maskBody("lakjsd,zmncxxx qweq");
         assertEquals("lakjsd,zmnc... qweq", masked);
     }
 
     @Test
+    @AnySettingsHttp(bodyMask = {"secret", "password", "....-.*\\.\\d{2,10}", "\\d{4}-\\d{1,2}-\\d{1,2}"})
     void multiMaskBodyTest() {
-        HttpGlobalSettings.globalBodyMask = new String[]{"secret", "password", "....-.*\\.\\d{2,10}", "\\d{4}-\\d{1,2}-\\d{1,2}"};
-
         String msg = String.format("hypothetical request containing a secret data like a password, "+
                         "or a variable timestamp: %s in the middle of request. date\":[%s]",
                 LocalDateTime.now().toString(), LocalDate.now().toString());
