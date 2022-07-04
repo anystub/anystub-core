@@ -108,7 +108,8 @@ public class HttpGlobalSettings {
             public StringOrArray(String data) {
                 this.data = new String[]{data};
             }
-            public StringOrArray(String data, String data1) {
+            public StringOrArray(String data,
+                                 String data1) {
                 this.data = new String[]{data,
                         data1};
             }
@@ -135,6 +136,8 @@ public class HttpGlobalSettings {
                                  String dataN) {
                 this.data = new String[]{data,
                         data1,
+                        data2,
+                        data3,
                         dataN};
             }
             public StringOrArray(String data,
@@ -145,6 +148,9 @@ public class HttpGlobalSettings {
                                  String dataN) {
                 this.data = new String[]{data,
                         data1,
+                        data2,
+                        data3,
+                        data4,
                         dataN};
             }
             public StringOrArray(String data,
@@ -156,6 +162,10 @@ public class HttpGlobalSettings {
                                  String dataN) {
                 this.data = new String[]{data,
                         data1,
+                        data2,
+                        data3,
+                        data4,
+                        data5,
                         dataN};
             }
             public StringOrArray(String data,
@@ -165,10 +175,14 @@ public class HttpGlobalSettings {
                                  String data4,
                                  String data5,
                                  String data6,
-
                                  String dataN) {
                 this.data = new String[]{data,
                         data1,
+                        data2,
+                        data3,
+                        data4,
+                        data5,
+                        data6,
                         dataN};
             }
             public StringOrArray(String data,
@@ -182,6 +196,12 @@ public class HttpGlobalSettings {
                                  String dataN) {
                 this.data = new String[]{data,
                         data1,
+                        data2,
+                        data3,
+                        data4,
+                        data5,
+                        data6,
+                        data7,
                         dataN};
             }
             public StringOrArray(String data,
@@ -196,6 +216,13 @@ public class HttpGlobalSettings {
                                  String dataN) {
                 this.data = new String[]{data,
                         data1,
+                        data2,
+                        data3,
+                        data4,
+                        data5,
+                        data6,
+                        data7,
+                        data8,
                         dataN};
             }
         }
