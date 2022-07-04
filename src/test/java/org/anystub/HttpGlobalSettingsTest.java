@@ -53,6 +53,11 @@ class HttpGlobalSettingsTest {
                 "test2",
                 "test4"
         }, load.bodyMask.get());
+        load = HttpGlobalSettings.load("src/test/resources/test4.yml");
+        assertNotNull(load);
+        load = HttpGlobalSettings.load("src/test/resources/test5.yml");
+        assertNotNull(load);
+
     }
 
 
