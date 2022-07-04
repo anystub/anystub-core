@@ -11,12 +11,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class BaseManagerImpl implements BaseManager {
-    private static BaseManagerImpl baseManager = new BaseManagerImpl();
+    private static BaseManager baseManager = new BaseManagerImpl();
     private List<Base> list = new ArrayList<>();
     public static final String DEFAULT_STUB_PATH = new File("src/test/resources/anystub/stub.yml").getPath();
     public static final String DEFAULT_PATH = new File("src/test/resources/anystub").getPath();
 
-    public static BaseManagerImpl instance() {
+    public static BaseManager instance() {
         return baseManager;
     }
 

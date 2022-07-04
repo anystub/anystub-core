@@ -3,7 +3,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=anystub_anystub-core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=anystub_anystub-core)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.anystub/anystub-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.anystub/anystub-core)
 
-The library helps you to automatically record and maintain request/response stubs in java tests - what you are missing when use [Wiremock](https://wiremock.org/). Inspired by vcr in RoR.
+The library helps you automatically record and maintain request/response stubs in java tests - what you are missing when use [Wiremock](https://wiremock.org/). Inspired by vcr in RoR.
 
 Install from Maven Central 
 ===
@@ -12,7 +12,7 @@ Install from Maven Central
     <dependency>
       <groupId>org.anystub</groupId>
       <artifactId>anystub</artifactId>
-      <version>0.8.2</version>
+      <version>0.9.0</version>
       <scope>test</scope>
     </dependency>
 ```
