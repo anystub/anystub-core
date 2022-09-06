@@ -30,7 +30,12 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Collections.singletonList;
-import static org.anystub.RequestMode.*;
+import static org.anystub.RequestMode.rmAll;
+import static org.anystub.RequestMode.rmFake;
+import static org.anystub.RequestMode.rmNew;
+import static org.anystub.RequestMode.rmNone;
+import static org.anystub.RequestMode.rmPassThrough;
+import static org.anystub.RequestMode.rmTrack;
 
 /**
  * provides basic access to stub-file
@@ -39,7 +44,6 @@ import static org.anystub.RequestMode.*;
  * methods request* allow get/keep data in file
  * <p>
  * Check {@link RequestMode} to find options to control get access to external system and store requests strategy
- *
  */
 public class Base {
 
@@ -157,6 +161,7 @@ public class Base {
 
     /**
      * returns Finds entity in a stub using the key. returns 1st value string
+     *
      * @param keys keys to find request
      * @return
      * @deprecated since = "0.7.0"
@@ -227,8 +232,8 @@ public class Base {
      * @param supplier      method which is able to return an actual response
      * @param responseClass type of the response
      * @param keys          all arguments of requested function
-     * @param <R> return type
-     * @param <E> controlled exception generator could generate
+     * @param <R>           return type
+     * @param <E>           controlled exception generator could generate
      * @return returns a response from system or recovered response from a stub
      * @throws E generates an exception if it comes from supplier or recorded in the stub
      */
@@ -249,17 +254,18 @@ public class Base {
                 new EncoderJson<>(),
                 StringUtil.toArray(keys));
     }
+
     /**
      * Requests an object. It looks for a document in a stub file
      * If it is not found then requests the value from the supplier.
      * Keys and response saves as json-strings.
      * Supports response generating: look at RequestMode.rmFake
      *
-     * @param supplier      method which is able to return an actual response
-     * @param returnType    type of the response
-     * @param keys          all arguments of requested function
-     * @param <R> return type
-     * @param <E> controlled exception generator could generate
+     * @param supplier   method which is able to return an actual response
+     * @param returnType type of the response
+     * @param keys       all arguments of requested function
+     * @param <R>        return type
+     * @param <E>        controlled exception generator could generate
      * @return returns a response from system or recovered response from a stub
      * @throws E generates an exception if it comes from supplier or recorded in the stub
      */
@@ -469,6 +475,35 @@ public class Base {
                                                Encoder<T> encoder,
                                                KeysSupplier keyGen) throws E {
 
+        return request2(supplier,
+                decoder,
+                (t, data) -> {
+                    Iterable<String> encode = encoder.encode(t);
+                    return data.apply(encode);
+                },
+                keyGen);
+    }
+
+    /**
+     * Looks for an Object in stub-file or gets it from the supplier.
+     * Uses inverter to encode to response to strings, call decodingAndSave to recover and save response
+     * and decoder to convert the request and results in the stub-file.
+     * Uses keysGen to get keys to match the request in the stub-files
+     *
+     * @param supplier - provides the value from an external system
+     * @param decoder  - recovers result from stub
+     * @param inverter  - converts result to strings for stub-file
+     * @param keyGen   - provides keys to match requested document
+     * @param <T>      - type of requested object
+     * @param <E>      - allowed exception
+     * @return an object from stub or an external system
+     * @throws E generates the exception if an external system generated it
+     */
+    public <T, E extends Throwable> T request2(Supplier<T, E> supplier,
+                                               Decoder<T> decoder,
+                                               Inverter<T> inverter,
+                                               KeysSupplier keyGen) throws E {
+
         if (requestMode == rmPassThrough) {
             return supplier.get();
         }
@@ -521,32 +556,32 @@ public class Base {
             throw ex;
         }
 
-        // store values
-        Document retrievedDocument;
 
-        Iterable<String> responseData;
         if (res == null) {
-            responseData = null;
+            // store values
+            Document retrievedDocument;
             retrievedDocument = new Document(keyGenCashed.get());
-        } else {
-            responseData = encoder.encode(res);
+            put(retrievedDocument);
+            requestHistory.add(retrievedDocument);
+            return null;
+        }
+
+        return inverter.invert(res, (responseData) -> {
             ArrayList<String> values = new ArrayList<>();
             for (String responseDatum : responseData) {
                 values.add(responseDatum);
             }
+            Document retrievedDocument;
             retrievedDocument = new Document(keyGenCashed.get(), values.toArray(new String[0]));
-        }
-        put(retrievedDocument);
-        requestHistory.add(retrievedDocument);
-        try {
-            save();
-        } catch (IOException ex) {
-            log.warning(() -> "exception information is not saved into stub: " + ex);
-        }
-        if (responseData == null) {
-            return null;
-        }
-        return decoder.decode(responseData);
+            put(retrievedDocument);
+            requestHistory.add(retrievedDocument);
+            try {
+                save();
+            } catch (IOException ex) {
+                log.warning(() -> "document is not saved into stub: " + ex);
+            }
+            return decoder.decode(responseData);
+        });
     }
 
     public <E extends Exception> void post(Consumer<E> consumer, Object... keys) throws E {
