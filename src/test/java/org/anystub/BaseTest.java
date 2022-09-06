@@ -2,7 +2,6 @@ package org.anystub;
 
 import org.anystub.mgmt.BaseManagerFactory;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -16,13 +15,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.emptyList;
 import static org.anystub.Document.ars;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -452,7 +455,7 @@ public class BaseTest {
 
     @Test
     @AnyStubId
-    public void testRequestO(){
+    public void testRequestO() {
         Base locate = BaseManagerFactory.locate();
         String s = locate.request(() -> "test", String.class, "method", null, "another key");
         assertEquals("test", s);
