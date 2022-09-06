@@ -566,7 +566,7 @@ public class Base {
             return null;
         }
 
-        return inverter.invert(res, (responseData) -> {
+        return inverter.invert(res, responseData -> {
             ArrayList<String> values = new ArrayList<>();
             for (String responseDatum : responseData) {
                 values.add(responseDatum);
