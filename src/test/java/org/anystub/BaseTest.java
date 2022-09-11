@@ -2,13 +2,14 @@ package org.anystub;
 
 import org.anystub.mgmt.BaseManagerFactory;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static java.lang.Integer.parseInt;
@@ -482,38 +483,74 @@ public class BaseTest {
 
     @Test
     @AnyStubId(requestMode = RequestMode.rmAll)
-    @Disabled
-    void testAsync() throws ExecutionException, InterruptedException {
+    void testAsync() throws Exception {
 
-        CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
-            return BaseManagerFactory.locate()
-                    .request(() -> "test", "testAsync");
-        });
-
-
-        CompletableFuture<String> resp2 = CompletableFuture.supplyAsync(() -> {
-            return BaseManagerFactory.locate()
-                    .request(() -> "testX", "testAsync");
-        });
+        try (AutoCloseable x = BaseManagerFactory.setMtFallback()) {
+            CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> "test", "testAsync");
+            });
 
 
-        CompletableFuture.allOf(resp, resp2).join();
+            CompletableFuture<String> resp2 = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> "testX", "testAsync");
+            });
 
-        Assertions.assertEquals(resp2.get(), resp.get());
-        long callsCount = BaseManagerFactory.locate()
-                .history("key1").count();
 
-        // @todo: failed because in the separate thread the method request cannot find
-        // AnystubId defined in the main-thread
-        Assertions.assertEquals(2, callsCount);
+            CompletableFuture.allOf(resp, resp2).join();
+
+            Assertions.assertEquals("test", resp.get());
+            Assertions.assertEquals("testX", resp2.get());
+            long callsCount = BaseManagerFactory.locate()
+                    .history("testAsync").count();
+
+            Assertions.assertEquals(2, callsCount);
+        }
+
     }
 
 
-//    @Test
-//    void xxx() {
-//        String name = Thread.currentThread().getName();
-////        Assertions.assertEquals("", name);
-//        Assertions.assertEquals(1L, Thread.currentThread().getId());
-//    }
+    @Test
+    @AnyStubId(requestMode = RequestMode.rmNew)
+    void testAsyncWithNew() throws Exception {
+
+        AtomicInteger realCalls = new AtomicInteger();
+
+        Files.deleteIfExists(new File(BaseManagerFactory.locate().getFilePath()).toPath());
+        BaseManagerFactory.locate().clear();
+
+        try (AutoCloseable x = BaseManagerFactory.setMtFallback()) {
+            CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> {
+                            realCalls.incrementAndGet();
+                            return "test";
+                        }, "testAsync");
+            });
+
+
+            CompletableFuture<String> resp2 = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> {
+                            realCalls.incrementAndGet();
+                            return "testX";
+                        }, "testAsync");
+            });
+
+
+            CompletableFuture.allOf(resp, resp2).join();
+
+            Assertions.assertEquals(resp.get(), resp2.get());
+            long callsCount = BaseManagerFactory.locate()
+                    .history("testAsync").count();
+
+            Assertions.assertEquals(2, callsCount);
+            Assertions.assertEquals(1, realCalls.get());
+        }
+
+    }
+
+
 
 }
