@@ -4,6 +4,8 @@ import org.anystub.AnyStubFileLocator;
 import org.anystub.AnyStubId;
 import org.anystub.Base;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public final class BaseManagerFactory {
     private static BaseManager baseManager = null;
 
@@ -25,9 +27,17 @@ public final class BaseManagerFactory {
     }
 
 
+    private static String fallback = null;
+
+//    public static void setFallback(String fallback) {
+//
+////        Thread.currentThread().getName()
+//        BaseManagerFactory.fallback = fallback;
+//    }
+
 
     public static Base locate() {
-        return BaseManagerFactory.locate(null);
+        return BaseManagerFactory.locate(BaseManagerFactory.fallback);
     }
 
     public static Base locate(String fallback) {
@@ -35,8 +45,7 @@ public final class BaseManagerFactory {
         if (s != null) {
             return BaseManagerFactory
                     .getBaseManager()
-                    .getBase(s.filename())
-                    .constrain(s.requestMode());
+                    .getBase(s.filename(), base -> base.constrain(s.requestMode()));
         }
 
         return BaseManagerFactory

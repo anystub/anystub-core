@@ -1,16 +1,28 @@
 package org.anystub.mgmt;
 
 import org.anystub.Base;
+import org.anystub.RequestMode;
+
+import java.util.function.Consumer;
 
 public interface BaseManager {
 
     /**
-     * returns stub by given file
+     * returns stub with specific path
      *
-     * @param filename stun file
+     * @param filename stub file
      * @return
      */
     Base getBase(String filename);
+
+    /**
+     * returns stub with specific path and specified Constrains
+     *
+     * @param filename stub-file
+     * @param initializer post constructor, invokes only when new base created
+     * @return
+     */
+    Base getBase(String filename, Consumer<Base> initializer);
 
     /**
      * returns default stub

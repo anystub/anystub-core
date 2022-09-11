@@ -3,11 +3,13 @@ package org.anystub.mgmt;
 import org.anystub.AnyStubFileLocator;
 import org.anystub.AnyStubId;
 import org.anystub.Base;
+import org.anystub.RequestMode;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BaseManagerImpl implements BaseManager {
@@ -34,12 +36,16 @@ public class BaseManagerImpl implements BaseManager {
     }
 
     /**
-     * returns stub with specific path
+     * returns stub with specific path and rmNew Constrains
      *
      * @param filename
      * @return
      */
+
     public Base getBase(String filename) {
+        return getBase(filename, (base) -> {});
+    }
+    public synchronized Base getBase(String filename, Consumer<Base> initializer){
 
         String fullPath = filename == null || filename.isEmpty() ?
                 DEFAULT_STUB_PATH :
@@ -49,6 +55,7 @@ public class BaseManagerImpl implements BaseManager {
             @Override
             public Base get() {
                 Base base = new Base(fullPath);
+                initializer.accept(base);
                 stubInitialization(base);
                 list.add(base);
                 return base;
@@ -85,8 +92,7 @@ public class BaseManagerImpl implements BaseManager {
     public Base getStub() {
         AnyStubId s = AnyStubFileLocator.discoverFile();
         if (s != null) {
-            return getBase(s.filename())
-                    .constrain(s.requestMode());
+            return getBase(s.filename(), base -> base.constrain(s.requestMode()));
         }
 
         return getBase();
@@ -96,14 +102,20 @@ public class BaseManagerImpl implements BaseManager {
     public Base getStub(String suffix) {
         AnyStubId s = AnyStubFileLocator.discoverFile(suffix);
         if (s != null) {
-            return getBase(s.filename())
-                    .constrain(s.requestMode());
+            return getBase(s.filename(), base -> base.constrain(s.requestMode()));
         }
 
         return getBase();
     }
 
 
+    @Deprecated
+    /**
+     * BaseManager calls it when creates a new stub
+     *
+     * migration: use initializer in `getBase(String filename, Consumer<Base> initializer)`
+     * @deprecated since = "0.9.3"
+     */
     protected void stubInitialization(Base newStub) {
         // default initializer does nothing
     }

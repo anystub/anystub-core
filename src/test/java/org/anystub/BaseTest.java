@@ -2,6 +2,7 @@ package org.anystub;
 
 import org.anystub.mgmt.BaseManagerFactory;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -15,6 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 
 import static java.lang.Integer.parseInt;
@@ -476,5 +479,41 @@ public class BaseTest {
         assertEquals("Привет привет", s);
 
     }
+
+    @Test
+    @AnyStubId(requestMode = RequestMode.rmAll)
+    @Disabled
+    void testAsync() throws ExecutionException, InterruptedException {
+
+        CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
+            return BaseManagerFactory.locate()
+                    .request(() -> "test", "testAsync");
+        });
+
+
+        CompletableFuture<String> resp2 = CompletableFuture.supplyAsync(() -> {
+            return BaseManagerFactory.locate()
+                    .request(() -> "testX", "testAsync");
+        });
+
+
+        CompletableFuture.allOf(resp, resp2).join();
+
+        Assertions.assertEquals(resp2.get(), resp.get());
+        long callsCount = BaseManagerFactory.locate()
+                .history("key1").count();
+
+        // @todo: failed because in the separate thread the method request cannot find
+        // AnystubId defined in the main-thread
+        Assertions.assertEquals(2, callsCount);
+    }
+
+
+//    @Test
+//    void xxx() {
+//        String name = Thread.currentThread().getName();
+////        Assertions.assertEquals("", name);
+//        Assertions.assertEquals(1L, Thread.currentThread().getId());
+//    }
 
 }

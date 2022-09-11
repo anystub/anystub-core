@@ -484,6 +484,8 @@ public class Base {
                 keyGen);
     }
 
+    private final Object request2$ = new Object();
+
     /**
      * Looks for an Object in stub-file or gets it from the supplier.
      * Uses inverter to encode to response to strings, call decodingAndSave to recover and save response
@@ -503,6 +505,18 @@ public class Base {
                                                Decoder<T> decoder,
                                                Inverter<T> inverter,
                                                KeysSupplier keyGen) throws E {
+        T t;
+        synchronized (request2$) {
+            t = request2Synchronized(supplier, decoder, inverter, keyGen);
+        }
+
+        return t;
+    }
+
+    private <T, E extends Throwable> T request2Synchronized(Supplier<T, E> supplier,
+                                                            Decoder<T> decoder,
+                                                            Inverter<T> inverter,
+                                                             KeysSupplier keyGen) throws E {
 
         if (requestMode == rmPassThrough) {
             return supplier.get();
