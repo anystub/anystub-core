@@ -484,6 +484,8 @@ public class Base {
                 keyGen);
     }
 
+    private final Object request2lock = new Object();
+
     /**
      * Looks for an Object in stub-file or gets it from the supplier.
      * Uses inverter to encode to response to strings, call decodingAndSave to recover and save response
@@ -503,6 +505,18 @@ public class Base {
                                                Decoder<T> decoder,
                                                Inverter<T> inverter,
                                                KeysSupplier keyGen) throws E {
+        T t;
+        synchronized (request2lock) {
+            t = request2Synchronized(supplier, decoder, inverter, keyGen);
+        }
+
+        return t;
+    }
+
+    private <T, E extends Throwable> T request2Synchronized(Supplier<T, E> supplier,
+                                                            Decoder<T> decoder,
+                                                            Inverter<T> inverter,
+                                                             KeysSupplier keyGen) throws E {
 
         if (requestMode == rmPassThrough) {
             return supplier.get();
@@ -664,7 +678,7 @@ public class Base {
     /**
      * if previous load() is successful then isNew returns false
      *
-     * @return true if the stub-file is not load in memory
+     * @return true if the stub-file is not loaded in memory
      */
     public boolean isNew() {
         return isNew;
@@ -722,7 +736,7 @@ public class Base {
     }
 
     /**
-     * finds requests in the stub-file by keys keys
+     * finds requests in the stub-file by keys
      * * if no keys provided then it returns all requests.
      * * one or more of the keys could be null. That means the matching by the key is omitted.
      * * match(null) and match(null,null) are different, match(null) searches requests with at least one string as the key
@@ -740,7 +754,7 @@ public class Base {
     }
 
     /**
-     * finds requests in the stub-file by keys keys. the same as {#match } but matches each string in the key using regex
+     * finds requests in the stub-file by keys. the same as {#match } but matches each string in the key using regex
      *
      * @param keys keys for matching
      * @return stream of matched documents from history
@@ -770,7 +784,7 @@ public class Base {
      * * if no keys provided then number of all requests.
      * * key could be skipped if you set correspondent value to null.
      * * times(null) and times(null,null) are different, cause looking for requests with
-     * amount of keys no less then in keys array.
+     * amount of keys no less than in keys array.
      *
      * @param keys keys for matching requests
      * @return amount of matched requests
@@ -785,7 +799,7 @@ public class Base {
      * * if no keys provided then number of all requests.
      * * key could be skipped if you set correspondent value to null.
      * * times(null) and times(null,null) are different, cause looking for requests with
-     * amount of keys no less then in keys array.
+     * amount of keys no less than in keys array.
      *
      * @param keys keys for matching requests
      * @return amount of matched requests
@@ -800,7 +814,7 @@ public class Base {
      * * if no keys then amount of all requests.
      * * key could be skipped if you set correspondent value to null.
      * * times(null) and times(null,null) are different, cause looking for requests with
-     * amount of keys no less then in keys array.
+     * amount of keys no less than in keys array.
      *
      * @param keys   values for matching requests by keys
      * @param values values for matching requests by value
@@ -815,7 +829,11 @@ public class Base {
         return filePath;
     }
 
-    private boolean seekInCache() {
+    /**
+     *
+     * @return returns true if it is expected to find result in cache before hitting actual system
+     */
+    public boolean seekInCache() {
         return requestMode == rmNew ||
                 requestMode == rmNone ||
                 requestMode == rmFake;

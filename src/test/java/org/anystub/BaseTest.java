@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -15,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static java.lang.Integer.parseInt;
@@ -476,5 +480,77 @@ public class BaseTest {
         assertEquals("Привет привет", s);
 
     }
+
+    @Test
+    @AnyStubId(requestMode = RequestMode.rmAll)
+    void testAsync() throws Exception {
+
+        try (AutoCloseable x = BaseManagerFactory.setMtFallback()) {
+            CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> "test", "testAsync");
+            });
+
+
+            CompletableFuture<String> resp2 = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> "testX", "testAsync");
+            });
+
+
+            CompletableFuture.allOf(resp, resp2).join();
+
+            Assertions.assertEquals("test", resp.get());
+            Assertions.assertEquals("testX", resp2.get());
+            long callsCount = BaseManagerFactory.locate()
+                    .history("testAsync").count();
+
+            Assertions.assertEquals(2, callsCount);
+        }
+
+    }
+
+
+    @Test
+    @AnyStubId(requestMode = RequestMode.rmNew)
+    void testAsyncWithNew() throws Exception {
+
+        AtomicInteger realCalls = new AtomicInteger();
+
+        Files.deleteIfExists(new File(BaseManagerFactory.locate().getFilePath()).toPath());
+        BaseManagerFactory.locate().clear();
+
+        try (AutoCloseable x = BaseManagerFactory.setMtFallback()) {
+            CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> {
+                            realCalls.incrementAndGet();
+                            return "test";
+                        }, "testAsync");
+            });
+
+
+            CompletableFuture<String> resp2 = CompletableFuture.supplyAsync(() -> {
+                return BaseManagerFactory.locate()
+                        .request(() -> {
+                            realCalls.incrementAndGet();
+                            return "testX";
+                        }, "testAsync");
+            });
+
+
+            CompletableFuture.allOf(resp, resp2).join();
+
+            Assertions.assertEquals(resp.get(), resp2.get());
+            long callsCount = BaseManagerFactory.locate()
+                    .history("testAsync").count();
+
+            Assertions.assertEquals(2, callsCount);
+            Assertions.assertEquals(1, realCalls.get());
+        }
+
+    }
+
+
 
 }
