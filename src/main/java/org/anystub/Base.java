@@ -484,7 +484,7 @@ public class Base {
                 keyGen);
     }
 
-    private final Object request2$ = new Object();
+    private final Object request2lock = new Object();
 
     /**
      * Looks for an Object in stub-file or gets it from the supplier.
@@ -506,7 +506,7 @@ public class Base {
                                                Inverter<T> inverter,
                                                KeysSupplier keyGen) throws E {
         T t;
-        synchronized (request2$) {
+        synchronized (request2lock) {
             t = request2Synchronized(supplier, decoder, inverter, keyGen);
         }
 
@@ -678,7 +678,7 @@ public class Base {
     /**
      * if previous load() is successful then isNew returns false
      *
-     * @return true if the stub-file is not loaded in memory 
+     * @return true if the stub-file is not loaded in memory
      */
     public boolean isNew() {
         return isNew;

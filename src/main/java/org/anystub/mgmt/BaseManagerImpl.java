@@ -3,7 +3,6 @@ package org.anystub.mgmt;
 import org.anystub.AnyStubFileLocator;
 import org.anystub.AnyStubId;
 import org.anystub.Base;
-import org.anystub.RequestMode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,8 +12,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BaseManagerImpl implements BaseManager {
-    private static BaseManager baseManager = new BaseManagerImpl();
-    private List<Base> list = new ArrayList<>();
+    private static final BaseManager baseManager = new BaseManagerImpl();
+    private static final List<Base> list = new ArrayList<>();
     public static final String DEFAULT_STUB_PATH = new File("src/test/resources/anystub/stub.yml").getPath();
     public static final String DEFAULT_PATH = new File("src/test/resources/anystub").getPath();
 
@@ -41,10 +40,18 @@ public class BaseManagerImpl implements BaseManager {
      * @param filename
      * @return
      */
-
     public Base getBase(String filename) {
-        return getBase(filename, (base) -> {});
+        return getBase(filename, base -> {});
     }
+
+    /**
+     * returns stub for given filePath,
+     * creates new one if non created before, for every newly created executes initializer
+     *
+     * @param filename stub-file
+     * @param initializer post constructor, invokes only when new base created
+     * @return
+     */
     public synchronized Base getBase(String filename, Consumer<Base> initializer){
 
         String fullPath = filename == null || filename.isEmpty() ?
@@ -78,7 +85,7 @@ public class BaseManagerImpl implements BaseManager {
     public static String getFilePath(String filename) {
         File file = new File(filename);
         if (file.getParentFile() == null || file.getParent().isEmpty()) {
-            return DEFAULT_PATH + File.separator + file.getPath();
+            return new File(DEFAULT_PATH,  file.getPath()).getPath();
         }
         return file.getPath();
     }

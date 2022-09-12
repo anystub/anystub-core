@@ -14,14 +14,14 @@ public @interface AnySettingsHttp {
      * ex. global settings define headers: "Context-Type" which requires to include it in every request
      *   in local test you can suppress adding it into stub
      * allHeaders - always overrides global, if not defined in class/method level then it is false
-     * if true - overrider global settings
-     * if false - enrich global settings
-     * @return
+     * if true - override global settings/ ignore config
+     * if false - (default) enrich global settings
+     * @return true - to override global settings defined in config
      */
     boolean overrideGlobal() default false;
 
     /**
-     * includes all headers in key
+     * include all headers in key
      * @return
      */
     boolean allHeaders() default false;

@@ -23,7 +23,6 @@ public class HttpGlobalSettings {
     static {
         String path = new File(BaseManagerImpl.DEFAULT_PATH, "config.yml").getPath();
         AnystubCfg load = load(path);
-        globalAllHeaders = load.allHeaders;
         globalHeaders = load.headers.get();
         globalBodyTrigger = load.bodyTrigger.get();
         globalBodyMask = load.bodyMask.get();
@@ -65,12 +64,6 @@ public class HttpGlobalSettings {
 
 
     /**
-     * enables to save all request headers in stub
-     * use it in debug mode - to manually validate headers
-     */
-    public static final boolean globalAllHeaders ;
-
-    /**
      * list of headers to save for all requests
      */
     public static final String[] globalHeaders;
@@ -87,7 +80,7 @@ public class HttpGlobalSettings {
     public static final String[] globalBodyMask;
 
     static class AnystubCfg {
-        public boolean allHeaders = false;
+//        public boolean allHeaders = false;
         public StringOrArray headers = new StringOrArray();
         public StringOrArray bodyTrigger = new StringOrArray();
         public StringOrArray bodyMask = new StringOrArray();
@@ -230,7 +223,6 @@ public class HttpGlobalSettings {
         @Override
         public String toString() {
             return "AnystubCfg{" +
-                    "allHeaders=" + allHeaders +
                     ", headers=" + Arrays.toString(headers.get()) +
                     ", bodyTrigger=" + Arrays.toString(bodyTrigger.get()) +
                     ", bodyMask=" + Arrays.toString(bodyMask.get()) +

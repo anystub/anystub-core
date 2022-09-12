@@ -11,21 +11,18 @@ class HttpGlobalSettingsTest {
     @Test
     void testNotExistCfg() {
         HttpGlobalSettings.AnystubCfg load = HttpGlobalSettings.load("src/test/resources/test-doesnot-exist.yml");
-        Assertions.assertFalse(load.allHeaders);
         Assertions.assertArrayEquals(new String[0], load.bodyMask.get());
     }
 
     @Test
     void testWrongProp() {
         HttpGlobalSettings.AnystubCfg load = HttpGlobalSettings.load("src/test/resources/test.yml");
-        Assertions.assertTrue(load.allHeaders);
         Assertions.assertArrayEquals(new String[0], load.bodyMask.get());
     }
 
     @Test
     void testProp1() {
         HttpGlobalSettings.AnystubCfg load = HttpGlobalSettings.load("src/test/resources/test1.yml");
-        Assertions.assertTrue(load.allHeaders);
         Assertions.assertArrayEquals(new String[]{"headers"}, load.headers.get());
         Assertions.assertArrayEquals(new String[]{""}, load.bodyTrigger.get());
         Assertions.assertArrayEquals(new String[]{"password: .{2,10}\\,"}, load.bodyMask.get());

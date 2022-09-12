@@ -1,7 +1,6 @@
 package org.anystub.mgmt;
 
 import org.anystub.Base;
-import org.anystub.RequestMode;
 
 import java.util.function.Consumer;
 

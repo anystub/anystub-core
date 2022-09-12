@@ -22,6 +22,7 @@ public final class BaseManagerFactory {
     public static Base getStub() {
         return BaseManagerFactory.getBaseManager().getStub();
     }
+
     public static Base getStub(String suffix) {
         return BaseManagerFactory.getBaseManager().getStub(suffix);
     }
@@ -46,9 +47,7 @@ public final class BaseManagerFactory {
             };
         }
         BaseManagerFactory.fallbackBase = discover;
-        return () -> {
-            BaseManagerFactory.fallbackBase = null;
-        };
+        return () -> BaseManagerFactory.fallbackBase = null;
     }
 
 
