@@ -5,15 +5,12 @@ import org.anystub.AnyStubId;
 import org.anystub.Base;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class BaseManagerImpl implements BaseManager {
     private static final BaseManager baseManager = new BaseManagerImpl();
-    private static final List<Base> list = new ArrayList<>();
+    private static final ConcurrentHashMap<String, Base> list = new ConcurrentHashMap<>();
     public static final String DEFAULT_STUB_PATH = new File("src/test/resources/anystub/stub.yml").getPath();
     public static final String DEFAULT_PATH = new File("src/test/resources/anystub").getPath();
 
@@ -52,31 +49,20 @@ public class BaseManagerImpl implements BaseManager {
      * @param initializer post constructor, invokes only when new base created
      * @return
      */
-    public synchronized Base getBase(String filename, Consumer<Base> initializer){
+    public Base getBase(String filename, Consumer<Base> initializer){
 
         String fullPath = filename == null || filename.isEmpty() ?
                 DEFAULT_STUB_PATH :
                 getFilePath(filename);
 
-        return get(fullPath).orElseGet(new Supplier<Base>() {
-            @Override
-            public Base get() {
+        return list.computeIfAbsent(fullPath, p -> {
                 Base base = new Base(fullPath);
                 initializer.accept(base);
                 stubInitialization(base);
-                list.add(base);
                 return base;
-            }
         });
     }
-
-    private Optional<Base> get(String fullFileName) {
-        return list
-                .stream()
-                .filter(base -> base.getFilePath().equals(fullFileName))
-                .findFirst();
-    }
-
+    
     /**
      * returns path for default stub
      *

@@ -1,12 +1,11 @@
 package org.anystub;
 
+import org.anystub.mgmt.MTCache;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -69,6 +68,8 @@ public class AnySettingsHttpExtractor {
 
     /**
      * fetches settings from annotations in a test
+     * (*tries MtCache if not found)
+     * enrich with setting file if allowed
      * @return settings based on annotations
      */
     public static AnySettingsHttp httpSettings() {
@@ -80,6 +81,9 @@ public class AnySettingsHttpExtractor {
 
 
         AnySettingsHttp settings = AnySettingsHttpExtractor.discoverSettings();
+        if(settings == null) {
+            settings = MTCache.getFallbackHttpSettings();
+        }
         if (settings != null) {
             overrideGlobal = settings.overrideGlobal();
             allHeaders = settings.allHeaders();

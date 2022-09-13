@@ -4,8 +4,6 @@ import org.anystub.AnyStubFileLocator;
 import org.anystub.AnyStubId;
 import org.anystub.Base;
 
-import java.util.logging.Logger;
-
 public final class BaseManagerFactory {
     private static BaseManager baseManager = null;
 
@@ -28,27 +26,6 @@ public final class BaseManagerFactory {
     }
 
 
-    private static Base fallbackBase = null;
-
-    public static void resetMtFallback() {
-        fallbackBase = null;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public static AutoCloseable setMtFallback() {
-        Base discover = discover();
-        if (discover == null) {
-            Logger log = Logger.getLogger(BaseManagerFactory.class.getName());
-            log.warning("Anystub cannot discover a test stub. Default stub will be used in the test.");
-            return () -> {
-            };
-        }
-        BaseManagerFactory.fallbackBase = discover;
-        return () -> BaseManagerFactory.fallbackBase = null;
-    }
 
 
     public static Base locate() {
@@ -56,13 +33,15 @@ public final class BaseManagerFactory {
     }
 
     public static Base locate(String fallback) {
-        Base discovered = discover();
+        AnyStubId s = AnyStubFileLocator.discoverFile();
+        Base discovered = baseFromSettings(s);
         if(discovered != null) {
             return discovered;
         }
 
-        if (fallbackBase != null) {
-            return fallbackBase;
+        discovered = baseFromSettings(MTCache.getFallbackBase());
+        if(discovered != null) {
+            return discovered;
         }
 
         return BaseManagerFactory
@@ -71,11 +50,11 @@ public final class BaseManagerFactory {
     }
 
     /**
-     * analyzes stack-trace to find
-     * @return
+     * builds base from given settings
+     * @param s settings
+     * @return base if settings provided, null if s is null
      */
-    private static Base discover() {
-        AnyStubId s = AnyStubFileLocator.discoverFile();
+    public static Base baseFromSettings(AnyStubId s){
         if (s == null) {
             return null;
         }

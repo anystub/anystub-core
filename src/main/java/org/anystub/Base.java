@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,7 +51,7 @@ import static org.anystub.RequestMode.rmTrack;
 public class Base {
 
     private static final Logger log = Logger.getLogger(Base.class.getName());
-    private final List<Document> documentList = new ArrayList<>();
+    private final ConcurrentLinkedQueue<Document> documentList = new ConcurrentLinkedQueue<>();
     private Iterator<Document> documentListTrackIterator;
     private final List<Document> requestHistory = new ArrayList<>();
     private final String filePath;
@@ -633,9 +636,10 @@ public class Base {
                 Map<String, Object> map = (Map<String, Object>) load;
                 map.forEach((k, v) -> documentList
                         .add(new Document((Map<String, Object>) v)));
-                isNew = false;
             }
+            isNew = false;
         } catch (FileNotFoundException e) {
+            isNew = false;
             log.info(() -> String.format("stub file %s is not found: %s", file.getAbsolutePath(), e));
         }
     }
@@ -653,14 +657,6 @@ public class Base {
         if (path != null && !path.exists()) {
             if (path.mkdirs())
                 log.info(() -> "dirs created");
-            else
-                throw new IOException("dirs for stub isn't created");
-        }
-        if (!file.exists()) {
-            if (file.createNewFile())
-                log.info(() -> "stub file is created:" + file.getAbsolutePath());
-            else
-                throw new IOException("stub file isn't created");
         }
 
         try (FileOutputStream out = new FileOutputStream(file);
@@ -668,15 +664,19 @@ public class Base {
             Yaml yaml = new Yaml(new SafeConstructor());
             Map<String, Object> saveList = new LinkedHashMap<>();
 
-            for (int i = 0; i < documentList.size(); i++) {
-                saveList.put(String.format("request%d", i), documentList.get(i).toMap());
+
+            int i=0;
+            for (Document next : documentList) {
+                saveList.put(String.format("request%d", i), next.toMap());
+                i++;
             }
+
             yaml.dump(saveList, output);
         }
     }
 
     /**
-     * if previous load() is successful then isNew returns false
+     * if previous load() is successful of file not found then isNew returns false
      *
      * @return true if the stub-file is not loaded in memory
      */
