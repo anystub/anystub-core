@@ -1,6 +1,7 @@
 package org.anystub;
 
 import org.anystub.mgmt.BaseManagerFactory;
+import org.anystub.mgmt.MTCache;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -485,7 +486,7 @@ public class BaseTest {
     @AnyStubId(requestMode = RequestMode.rmAll)
     void testAsync() throws Exception {
 
-        try (AutoCloseable x = BaseManagerFactory.setMtFallback()) {
+        try (AutoCloseable x = MTCache.setMtFallback()) {
             CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
                 return BaseManagerFactory.locate()
                         .request(() -> "test", "testAsync");
@@ -520,7 +521,7 @@ public class BaseTest {
         Files.deleteIfExists(new File(BaseManagerFactory.locate().getFilePath()).toPath());
         BaseManagerFactory.locate().clear();
 
-        try (AutoCloseable x = BaseManagerFactory.setMtFallback()) {
+        try (AutoCloseable x = MTCache.setMtFallback()) {
             CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {
                 return BaseManagerFactory.locate()
                         .request(() -> {

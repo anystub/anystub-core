@@ -1,6 +1,5 @@
 package org.anystub;
 
-import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class StringUtil {
             Character.UnicodeBlock block = Character.UnicodeBlock.of( c );
             if(block ==null ||
                 block == Character.UnicodeBlock.SPECIALS ||
-                c == KeyEvent.CHAR_UNDEFINED ||
+                c == 0xFFFF ||  //CHAR_UNDEFINED
                 Character.isISOControl(c)
             ) {
                 return false;
