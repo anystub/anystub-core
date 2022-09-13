@@ -17,6 +17,10 @@ public class MTCache {
     private static AnyStubId fallbackBase = null;
     private static AnySettingsHttp fallbackHttpSettings = null;
 
+    private MTCache() {
+        
+    }
+
     public static void resetMtFallback() {
         fallbackBase = null;
         fallbackHttpSettings = null;

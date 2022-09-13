@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -654,9 +652,10 @@ public class Base {
         File file = new File(filePath);
         File path = file.getParentFile();
 
-        if (path != null && !path.exists()) {
-            if (path.mkdirs())
-                log.info(() -> "dirs created");
+        if (path != null
+                && !path.exists()
+                && path.mkdirs()) {
+            log.info(() -> "dirs created");
         }
 
         try (FileOutputStream out = new FileOutputStream(file);

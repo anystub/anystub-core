@@ -62,7 +62,7 @@ public class BaseManagerImpl implements BaseManager {
                 return base;
         });
     }
-    
+
     /**
      * returns path for default stub
      *
