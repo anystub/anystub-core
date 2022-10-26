@@ -3,6 +3,7 @@ package org.anystub;
 
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
 public class SettingsUtil {
@@ -13,8 +14,20 @@ public class SettingsUtil {
      * @param url url to test
      * @return
      */
+    @Deprecated
     public static boolean matchBodyRule(String url) {
-        return matchBodyRule(url, AnySettingsHttpExtractor.httpSettings());
+        return matchBodyRule("POST", url, AnySettingsHttpExtractor.httpSettings());
+    }
+
+    /**
+     * checks if URL should trigger saving request body
+     * finds settings in the stack
+     * @param method method of the request
+     * @param url url to test
+     * @return true if method and url match setting
+     */
+    public static boolean matchBodyRule(String method, String url) {
+        return matchBodyRule(method, url, AnySettingsHttpExtractor.httpSettings());
     }
 
     /**
@@ -24,8 +37,22 @@ public class SettingsUtil {
      * @param settings test settings
      * @return
      */
-    public static boolean matchBodyRule(String url, AnySettingsHttp settings) {
+    public static boolean matchBodyRule(String httpMethod, String url, AnySettingsHttp settings) {
+        if(!asList(settings.bodyMethods()).contains(httpMethod)) {
+            return false;
+        }
+        if (stream(settings.bodyTrigger())
+                .filter(rule -> rule.startsWith("-"))
+                .anyMatch(rule -> url.contains(rule.substring(1)))){
+            return false;
+        }
+
+        if (settings.bodyTrigger().length == 0 ) {
+            return true;
+        }
+
         return stream(settings.bodyTrigger())
+                .filter(rule -> !rule.startsWith("-"))
                 .anyMatch(url::contains);
     }
 

@@ -19,6 +19,14 @@ class SettingsUtilTest {
 
     @Test
     @AnyStubId
+    @AnySettingsHttp(bodyTrigger = "local")
+    void methodBodyRuleTest() {
+        boolean local_glo = SettingsUtil.matchBodyRule("POST", "local glo");
+        assertTrue(local_glo);
+    }
+
+    @Test
+    @AnyStubId
     @AnySettingsHttp(bodyTrigger = "local", bodyMask = "xxx")
     void maskBodyTest() {
         String masked = SettingsUtil.maskBody("lakjsd,zmncxxx qweq");
