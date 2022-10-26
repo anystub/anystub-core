@@ -19,6 +19,52 @@ class SettingsUtilTest {
 
     @Test
     @AnyStubId
+    @AnySettingsHttp(bodyTrigger = "local")
+    void methodBodyRuleTest() {
+        boolean local_glo = SettingsUtil.matchBodyRule("POST", "local glo");
+        assertTrue(local_glo);
+    }
+
+    @Test
+    @AnyStubId
+    @AnySettingsHttp
+    void testNotBodyMethod() {
+        boolean local_glo;
+        local_glo = SettingsUtil.matchBodyRule("GET", "local glo");
+        assertFalse(local_glo);
+        local_glo = SettingsUtil.matchBodyRule("CUSTOM", "local glo");
+        assertFalse(local_glo);
+    }
+
+    @Test
+    @AnyStubId
+    @AnySettingsHttp(bodyTrigger = "-")
+    void testExcludePostBodyMethod() {
+        boolean local_glo;
+        local_glo = SettingsUtil.matchBodyRule("POST", "local glo");
+        assertFalse(local_glo);
+    }
+
+    @Test
+    @AnyStubId
+    void testDefaultPostBodyInclude() {
+        boolean local_glo;
+        local_glo = SettingsUtil.matchBodyRule("POST", "local glo");
+        assertTrue(local_glo);
+    }
+    @Test
+    @AnyStubId
+    @AnySettingsHttp(bodyTrigger = "api")
+    void testSelectPostBodyInclude() {
+        boolean local_glo;
+        local_glo = SettingsUtil.matchBodyRule("POST", "api/test");
+        assertTrue(local_glo);
+        local_glo = SettingsUtil.matchBodyRule("POST", "auth");
+        assertFalse(local_glo);
+    }
+
+    @Test
+    @AnyStubId
     @AnySettingsHttp(bodyTrigger = "local", bodyMask = "xxx")
     void maskBodyTest() {
         String masked = SettingsUtil.maskBody("lakjsd,zmncxxx qweq");
