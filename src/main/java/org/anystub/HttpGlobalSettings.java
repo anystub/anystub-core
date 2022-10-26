@@ -26,6 +26,7 @@ public class HttpGlobalSettings {
         globalHeaders = load.headers.get();
         globalBodyTrigger = load.bodyTrigger.get();
         globalBodyMask = load.bodyMask.get();
+        globalBodyMethods = load.bodyMethods.get();
     }
 
 
@@ -45,6 +46,9 @@ public class HttpGlobalSettings {
             }
             if(anystubCfg.bodyMask == null) {
                 anystubCfg.bodyMask = new AnystubCfg.StringOrArray();
+            }
+            if(anystubCfg.bodyMethods == null) {
+                anystubCfg.bodyMethods = new AnystubCfg.StringOrArray();
             }
 
             return anystubCfg;
@@ -79,11 +83,13 @@ public class HttpGlobalSettings {
      */
     public static final String[] globalBodyMask;
 
+    public static final String[] globalBodyMethods;
+
     static class AnystubCfg {
-//        public boolean allHeaders = false;
         public StringOrArray headers = new StringOrArray();
         public StringOrArray bodyTrigger = new StringOrArray();
         public StringOrArray bodyMask = new StringOrArray();
+        public StringOrArray bodyMethods = new StringOrArray();
 
         public boolean packagePrefix = false;
         public String stubServer = "";

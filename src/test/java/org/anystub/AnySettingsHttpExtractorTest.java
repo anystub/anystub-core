@@ -130,4 +130,17 @@ class AnySettingsHttpExtractorTest {
         r.run();
     }
 
+    @Test
+    void testDefaultHttpMethodsIfNoAnnotation() {
+        AnySettingsHttp settingsHttp = AnySettingsHttpExtractor.httpSettings();
+        Assertions.assertArrayEquals(new String[]{"POST", "PUT", "DELETE"}, settingsHttp.bodyMethods());
+    }
+
+    @Test
+    @AnySettingsHttp(bodyMethods = {"GET", "CUSTOM"})
+    void testSpecifyHttpMethods() {
+        AnySettingsHttp settingsHttp = AnySettingsHttpExtractor.httpSettings();
+        Assertions.assertArrayEquals(new String[]{"GET", "CUSTOM"}, settingsHttp.bodyMethods());
+    }
+
 }
