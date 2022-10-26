@@ -34,12 +34,21 @@ public @interface AnySettingsHttp {
     String[] headers() default {};
 
     /**
-     * to define URLs which trigger inclusion a request body in a key.
+     * to define pattern which triggers inclusion a request body in a key for selected http Methods
      * request body includes in a key if any of these strings is a substring of URL
+     * if not defined non-empty request body will be included for every call with http-methods defined in bodyMethods
      * example:
      *  '@AnySettingsHttp(bodyTrigger = "random")'
      *  the request to https://gturnquist-quoters.cfapps.io:443/api/randomX will be recorded with request body
      *  the request to https://gturnquist-quoters.cfapps.io:443/api/any will be recorded without request body
+     *
+     * "-" (dash) at start excludes given requests from recording with body
+     *  '@AnySettingsHttp(bodyTrigger = {"-auth", "random"})'
+     *  the request to https://gturnquist-quoters.cfapps.io:443/api/randomX will be recorded with request body
+     *  the request to https://gturnquist-quoters.cfapps.io:443/api/any will be recorded without request body
+     *  the request to https://gturnquist-random.cfapps.io:443/auth will be recorded without request body
+     *
+     *  '@AnySettingsHttp(bodyTrigger = "-")' the "-" dash pattern makes all methods to record without body
      *
      * @return strings which trigger including request body into index
      */
@@ -51,5 +60,11 @@ public @interface AnySettingsHttp {
      */
     String[] bodyMask() default {};
 
+    /**
+     * http-methods for which request body will be included in a key of the request
+     * use bodyTrigger property if you don't want to include body into key for all calls
+     * @return
+     */
+    String[] bodyMethods() default {"POST", "PUT", "DELETE"};
 
 }

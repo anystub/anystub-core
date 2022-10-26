@@ -4,8 +4,11 @@ import org.anystub.mgmt.MTCache;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -75,9 +78,10 @@ public class AnySettingsHttpExtractor {
     public static AnySettingsHttp httpSettings() {
         boolean overrideGlobal = false;
         boolean allHeaders = false;
-        Set<String> headers = new HashSet<>();
-        Set<String> bodyTrigger = new HashSet<>();
-        Set<String> bodyMask = new HashSet<>();
+        final List<String> headers = new ArrayList<>();
+        final List<String> bodyTrigger = new ArrayList<>();
+        final List<String> bodyMask = new ArrayList<>();
+        final List<String> bodyMethods = new ArrayList<>();
 
 
         AnySettingsHttp settings = AnySettingsHttpExtractor.discoverSettings();
@@ -90,12 +94,18 @@ public class AnySettingsHttpExtractor {
             headers.addAll(asList(settings.headers()));
             bodyTrigger.addAll(asList(settings.bodyTrigger()));
             bodyMask.addAll(asList(settings.bodyMask()));
+            bodyMethods.addAll(asList(settings.bodyMethods()));
+        }
+
+        if (settings == null) {
+            bodyMethods.addAll(asList("POST", "PUT", "DELETE"));
         }
 
         if (settings==null || !settings.overrideGlobal()) {
             headers.addAll(asList(HttpGlobalSettings.globalHeaders));
             bodyTrigger.addAll(asList(HttpGlobalSettings.globalBodyTrigger));
             bodyMask.addAll(asList(HttpGlobalSettings.globalBodyMask));
+            bodyMethods.addAll(asList(HttpGlobalSettings.globalBodyMethods));
         }
 
         boolean overrideGlobalF = overrideGlobal;
@@ -121,17 +131,22 @@ public class AnySettingsHttpExtractor {
 
             @Override
             public String[] headers() {
-                return headers.toArray(new String[0]);
+                return headers.stream().distinct().toArray(String[]::new);
             }
 
             @Override
             public String[] bodyTrigger() {
-                return bodyTrigger.toArray(new String[0]);
+                return bodyTrigger.stream().distinct().toArray(String[]::new);
             }
 
             @Override
             public String[] bodyMask() {
-                return bodyMask.toArray(new String[0]);
+                return bodyMask.stream().distinct().toArray(String[]::new);
+            }
+
+            @Override
+            public String[] bodyMethods() {
+                return bodyMethods.stream().distinct().toArray(String[]::new);
             }
         };
     }

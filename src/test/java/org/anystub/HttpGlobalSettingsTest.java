@@ -53,6 +53,12 @@ class HttpGlobalSettingsTest {
 
     }
 
+    @Test
+    void testBodyMethods() {
+        HttpGlobalSettings.AnystubCfg load = HttpGlobalSettings.load("src/test/resources/testBodyMethods.yml");
+
+        Assertions.assertArrayEquals(new String[]{"CUSTOM"}, load.bodyMethods.get());
+    }
 
 
 }
