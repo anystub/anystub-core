@@ -8,6 +8,9 @@ import static java.util.Arrays.stream;
 
 public class SettingsUtil {
 
+    private SettingsUtil() {
+    }
+
     /**
      * checks if URL should trigger saving request body
      * finds settings in the stack
