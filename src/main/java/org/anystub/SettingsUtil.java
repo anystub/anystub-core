@@ -13,8 +13,9 @@ public class SettingsUtil {
      * finds settings in the stack
      * @param url url to test
      * @return
+     * @deprecated
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static boolean matchBodyRule(String url) {
         return matchBodyRule("POST", url, AnySettingsHttpExtractor.httpSettings());
     }
