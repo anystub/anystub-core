@@ -3,6 +3,7 @@ package org.anystub;
 import org.anystub.mgmt.BaseManagerFactory;
 import org.anystub.mgmt.MTCache;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -458,12 +459,16 @@ public class BaseTest {
     }
 
 
-    @Test
-    @AnyStubId
+    @RepeatedTest(1)
+    @AnyStubId(requestMode = RequestMode.rmAll)
     public void testRequestO() {
         Base locate = BaseManagerFactory.locate();
-        String s = locate.request(() -> "test", String.class, "method", null, "another key");
+        String s;
+        s = locate.request(() -> "test", String.class, "method", null, "another key");
         assertEquals("test", s);
+
+        s = locate.request(() -> "test2", String.class, "method2", null, "another key");
+        assertEquals("test2", s);
 
 
     }

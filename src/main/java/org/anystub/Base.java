@@ -3,8 +3,9 @@ package org.anystub;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,9 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -626,15 +625,17 @@ public class Base {
         File file = new File(filePath);
         try (InputStream inputStream = new FileInputStream(file);
              InputStreamReader input = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            Yaml yaml = new Yaml(new SafeConstructor());
-            Object load = yaml.load(input);
+            LoaderOptions options = new LoaderOptions();
 
-            if (load instanceof Map) {
-                clear();
-                Map<String, Object> map = (Map<String, Object>) load;
-                map.forEach((k, v) -> documentList
-                        .add(new Document((Map<String, Object>) v)));
-            }
+            Yaml yaml = new Yaml(new DocumentConstructor(options));
+            Iterable<Object> load = yaml.loadAll(input);
+
+            clear();
+            load.forEach(d -> {
+                if (d instanceof Document) {
+                    documentList.add((Document) d);
+                }
+            });
             isNew = false;
         } catch (FileNotFoundException e) {
             isNew = false;
@@ -659,18 +660,16 @@ public class Base {
         }
 
         try (FileOutputStream out = new FileOutputStream(file);
-             OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-            Yaml yaml = new Yaml(new SafeConstructor());
-            Map<String, Object> saveList = new LinkedHashMap<>();
+            OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 
 
-            int i=0;
-            for (Document next : documentList) {
-                saveList.put(String.format("request%d", i), next.toMap());
-                i++;
-            }
+            DumperOptions options = new DumperOptions();
+            options.setExplicitStart(true);
 
-            yaml.dump(saveList, output);
+            Yaml yaml = new Yaml(new DocumentRepresent(options));
+//            yaml.addImplicitResolver(Tag.MAP, Pattern.compile(""),"");
+            yaml.dumpAll(documentList.iterator(), output);
+
         }
     }
 
