@@ -55,12 +55,6 @@ public @interface AnySettingsHttp {
     String[] bodyTrigger() default {};
 
     /**
-     * to define regex expressions which will be replaced by elapses "..." in a request body
-     * @return
-     */
-//    String[] bodyMask() default {};
-
-    /**
      * http-methods for which request body will be included in a key of the request
      * use bodyTrigger property if you don't want to include body into key for all calls
      * @return
