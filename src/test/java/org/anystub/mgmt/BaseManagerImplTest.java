@@ -7,10 +7,10 @@ import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BaseManagerImplTest {
+class BaseManagerImplTest {
 
     @Test
-    public void testScenario() {
+    void testScenario() {
 
         BaseManagerImpl.instance().getBase("test.yml");
 
@@ -26,7 +26,7 @@ public class BaseManagerImplTest {
     }
 
     @Test
-    public void testGetNamesTest() {
+    void testGetNamesTest() {
         assertTrue(BaseManagerImpl.getFilePath("test3.yml").endsWith(File.separator + "test3.yml"));
         assertTrue(BaseManagerImpl.getFilePath("src/test3.yml").endsWith(File.separator + "test3.yml"));
         assertTrue(BaseManagerImpl.getFilePath("./test3.yml").endsWith(File.separator + "test3.yml"));

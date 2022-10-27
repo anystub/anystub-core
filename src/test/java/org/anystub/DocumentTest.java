@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * test for document class
  */
-public class DocumentTest {
+class DocumentTest {
 
     @Test
     void testtestEqualTest() {
