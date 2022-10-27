@@ -57,15 +57,15 @@ class SettingsUtilTest {
     }
 
     @Test
-    @AnyStubId
-    @AnySettingsHttp(bodyTrigger = "local", bodyMask = "xxx")
+    @AnyStubId(requestMasks = "xxx")
+    @AnySettingsHttp(bodyTrigger = "local")
     void maskBodyTest() {
         String masked = SettingsUtil.maskBody("lakjsd,zmncxxx qweq");
         assertEquals("lakjsd,zmnc... qweq", masked);
     }
 
     @Test
-    @AnySettingsHttp(bodyMask = {"secret", "password", "....-.*\\.\\d{2,10}", "\\d{4}-\\d{1,2}-\\d{1,2}"})
+    @AnyStubId(requestMasks = {"secret", "password", "....-.*\\.\\d{2,10}", "\\d{4}-\\d{1,2}-\\d{1,2}"})
     void multiMaskBodyTest() {
         String msg = String.format("hypothetical request containing a secret data like a password, "+
                         "or a variable timestamp: %s in the middle of request. date\":[%s]",

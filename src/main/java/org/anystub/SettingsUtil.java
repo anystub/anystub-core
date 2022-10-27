@@ -66,7 +66,7 @@ public class SettingsUtil {
      */
     public static String maskBody(String s, AnyStubId settings) {
 
-        if (settings.requestMasks().length == 0) {
+        if (settings==null || settings.requestMasks().length == 0) {
             return s;
         }
 

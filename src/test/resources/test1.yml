@@ -1,4 +1,4 @@
 allHeaders: true
 headers: headers
 bodyTrigger: ''
-bodyMask: "password: .{2,10}\\,"
+requestMask: "password: .{2,10}\\,"

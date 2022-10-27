@@ -17,7 +17,6 @@ class AnySettingsHttpExtractorTest {
         assertFalse(anySettingsHttp.allHeaders());
         assertEquals(0, anySettingsHttp.headers().length);
         assertEquals(0, anySettingsHttp.bodyTrigger().length);
-        assertEquals(0, anySettingsHttp.bodyMask().length);
 
     }
 
@@ -25,8 +24,7 @@ class AnySettingsHttpExtractorTest {
     @AnySettingsHttp(overrideGlobal = true,
         allHeaders = true,
             headers = {"accept", "Content-Type"},
-            bodyTrigger = "http",
-            bodyMask = "111"
+            bodyTrigger = "http"
     )
     void discoveryAllPropTest() {
         AnySettingsHttp anySettingsHttp = AnySettingsHttpExtractor.discoverSettings();
@@ -34,7 +32,6 @@ class AnySettingsHttpExtractorTest {
         assertTrue(anySettingsHttp.allHeaders());
         assertArrayEquals(new String[]{"accept", "Content-Type"}, anySettingsHttp.headers());
         assertArrayEquals(new String[]{"http"}, anySettingsHttp.bodyTrigger());
-        assertArrayEquals(new String[]{"111"}, anySettingsHttp.bodyMask());
     }
 
     static class OneException extends RuntimeException {
@@ -44,8 +41,7 @@ class AnySettingsHttpExtractorTest {
     @AnySettingsHttp(overrideGlobal = true,
             allHeaders = true,
             headers = {"accept1", "Content-Type"},
-            bodyTrigger = "http",
-            bodyMask = "111"
+            bodyTrigger = "http"
     )
     void discoveryAllPropInLambdaTest() {
         Assertions.assertThrows(OneException.class, ()->{
@@ -54,7 +50,6 @@ class AnySettingsHttpExtractorTest {
             assertTrue(anySettingsHttp.allHeaders());
             assertArrayEquals(new String[]{"accept1", "Content-Type"}, anySettingsHttp.headers());
             assertArrayEquals(new String[]{"http"}, anySettingsHttp.bodyTrigger());
-            assertArrayEquals(new String[]{"111"}, anySettingsHttp.bodyMask());
             throw new OneException();
         });
     }
@@ -71,8 +66,7 @@ class AnySettingsHttpExtractorTest {
     @AnySettingsHttp(overrideGlobal = true,
             allHeaders = true,
             headers = {"accept", "Content-Type"},
-            bodyTrigger = "http2",
-            bodyMask = "111"
+            bodyTrigger = "http2"
     )
     void discoveryAllPropInInnerClassTest() {
         AnySettingsHttp anySettingsHttp = new ProxyClass().get(1,"");
@@ -80,7 +74,6 @@ class AnySettingsHttpExtractorTest {
         assertTrue(anySettingsHttp.allHeaders());
         assertArrayEquals(new String[]{"accept", "Content-Type"}, anySettingsHttp.headers());
         assertArrayEquals(new String[]{"http2"}, anySettingsHttp.bodyTrigger());
-        assertArrayEquals(new String[]{"111"}, anySettingsHttp.bodyMask());
 
     }
 
