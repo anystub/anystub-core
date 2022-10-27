@@ -20,10 +20,16 @@ public class AnyStubFileLocator3Test {
 
     @Test
     public void testDiscoverFile() {
-        String aaa = BaseManagerFactory.getBaseManager().getBase("AnyStubFileLocatorTest3-x.yml").get("aaa");
+        String aaa = BaseManagerFactory.getBaseManager().getBase("AnyStubFileLocatorTest3-x.yml")
+                .getVals("aaa")
+                .iterator()
+                .next();
         assertEquals("bbb", aaa);
 
-        String ones = BaseManagerFactory.getBaseManager().getBase("AnyStubFileLocatorTest3-x.yml").get("111");
+        String ones = BaseManagerFactory.getBaseManager().getBase("AnyStubFileLocatorTest3-x.yml")
+                .getVals("111")
+                .iterator()
+                .next();
         assertEquals("222", ones);
 
 

@@ -3,8 +3,9 @@ package org.anystub;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,16 +20,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.util.Collections.singletonList;
 import static org.anystub.RequestMode.rmAll;
@@ -160,17 +157,6 @@ public class Base {
                 .findFirst();
     }
 
-    /**
-     * returns Finds entity in a stub using the key. returns 1st value string
-     *
-     * @param keys keys to find request
-     * @return
-     * @deprecated since = "0.7.0"
-     */
-    @Deprecated(since = "0.7.0")
-    public String get(String... keys) {
-        return getVals(keys).iterator().next();
-    }
 
     /**
      * Finds document with the given key. If document found then returns iterator to the values from the document
@@ -350,44 +336,6 @@ public class Base {
                 StringUtil::decode,
                 StringUtil::encode,
                 keys);
-    }
-
-    /**
-     * Requests an array of string from stub.
-     * If this document is absent in cache throws {@link NoSuchElementException}
-     *
-     * @param keys keys for searching response in stub
-     * @param <E>  type of allowed Exception
-     * @return requested response
-     * @throws E if document if not found in cache
-     * @deprecated use request instead
-     */
-    @Deprecated(since = "0.7.0")
-    public <E extends Exception> String[] requestArray(String... keys) throws E {
-        return request2(Base::throwNSE,
-                values -> values == null ? null : StreamSupport.stream(values.spliterator(), false).collect(Collectors.toList()).toArray(new String[0]),
-                Base::throwNSE,
-                keys);
-
-    }
-
-    /**
-     * Requests an array of string.
-     *
-     * @param supplier provide string array from system
-     * @param keys     keys for request
-     * @param <E>      expected exception
-     * @return string array. it could be null;
-     * @throws E expected exception
-     * @deprecated use request instead
-     */
-    @Deprecated(since = "0.7.0")
-    public <E extends Exception> String[] requestArray(Supplier<String[], E> supplier, String... keys) throws E {
-        return request2(supplier,
-                values -> values == null ? null : StreamSupport.stream(values.spliterator(), false).collect(Collectors.toList()).toArray(new String[0]),
-                Arrays::asList,
-                keys);
-
     }
 
     /**
@@ -626,15 +574,17 @@ public class Base {
         File file = new File(filePath);
         try (InputStream inputStream = new FileInputStream(file);
              InputStreamReader input = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            Yaml yaml = new Yaml(new SafeConstructor());
-            Object load = yaml.load(input);
+            LoaderOptions options = new LoaderOptions();
 
-            if (load instanceof Map) {
-                clear();
-                Map<String, Object> map = (Map<String, Object>) load;
-                map.forEach((k, v) -> documentList
-                        .add(new Document((Map<String, Object>) v)));
-            }
+            Yaml yaml = new Yaml(new DocumentConstructor(options));
+            Iterable<Object> load = yaml.loadAll(input);
+
+            clear();
+            load.forEach(d -> {
+                if (d instanceof Document) {
+                    documentList.add((Document) d);
+                }
+            });
             isNew = false;
         } catch (FileNotFoundException e) {
             isNew = false;
@@ -659,18 +609,15 @@ public class Base {
         }
 
         try (FileOutputStream out = new FileOutputStream(file);
-             OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-            Yaml yaml = new Yaml(new SafeConstructor());
-            Map<String, Object> saveList = new LinkedHashMap<>();
+            OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 
 
-            int i=0;
-            for (Document next : documentList) {
-                saveList.put(String.format("request%d", i), next.toMap());
-                i++;
-            }
+            DumperOptions options = new DumperOptions();
+            options.setExplicitStart(true);
 
-            yaml.dump(saveList, output);
+            Yaml yaml = new Yaml(new DocumentRepresent(options));
+            yaml.dumpAll(documentList.iterator(), output);
+
         }
     }
 

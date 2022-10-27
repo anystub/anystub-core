@@ -14,18 +14,6 @@ public class SettingsUtil {
     /**
      * checks if URL should trigger saving request body
      * finds settings in the stack
-     * @param url url to test
-     * @return
-     * @deprecated
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean matchBodyRule(String url) {
-        return matchBodyRule("POST", url, AnySettingsHttpExtractor.httpSettings());
-    }
-
-    /**
-     * checks if URL should trigger saving request body
-     * finds settings in the stack
      * @param method method of the request
      * @param url url to test
      * @return true if method and url match setting
@@ -69,7 +57,7 @@ public class SettingsUtil {
         return maskBody(s, AnySettingsHttpExtractor.httpSettings());
     }
     /**
-     * combines all available rules from HttpGlobalSettings.globalBodyMask and AnySettingsHttp.bodyMask
+     * combines all available rules from GlobalSettings.globalBodyMask and AnySettingsHttp.bodyMask
      * and replace match with ellipsis (...).
      * If rules not specified - no replacements performed
      * @param s string to mask

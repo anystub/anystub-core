@@ -14,21 +14,25 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
- * keeps global settings for Http interceptors
- * set them globally before running tests
- * no thread-safe
+ * keeps global settings from resources/anystub/config.yml
+ * file locator and Http interceptors use the setting
+ * loads once before any tests starts
+ * immutable
  */
-public class HttpGlobalSettings {
+public class GlobalSettings {
 
     static {
         String path = new File(BaseManagerImpl.DEFAULT_PATH, "config.yml").getPath();
         AnystubCfg load = load(path);
+        testFilePrefix = load.testFilePrefix;
         globalHeaders = load.headers.get();
         globalBodyTrigger = load.bodyTrigger.get();
         globalBodyMask = load.bodyMask.get();
         globalBodyMethods = load.bodyMethods.get();
     }
 
+    private GlobalSettings() {
+    }
 
     public static AnystubCfg load(String s) {
         try (InputStream input = new FileInputStream(s)) {
@@ -54,10 +58,10 @@ public class HttpGlobalSettings {
             return anystubCfg;
 
         } catch (IOException ex) {
-            Logger.getLogger(HttpGlobalSettings.class.getName())
+            Logger.getLogger(GlobalSettings.class.getName())
                     .finest(() -> String.format("can't load default properties from %s: %s", s, ex.getMessage()));
         } catch (YAMLException ex) {
-            Logger.getLogger(HttpGlobalSettings.class.getName())
+            Logger.getLogger(GlobalSettings.class.getName())
                     .warning(()->String.format("can't load default properties from %s: %s", s, ex.getMessage()));
         }
 
@@ -65,7 +69,7 @@ public class HttpGlobalSettings {
     }
 
 
-
+    public static final boolean testFilePrefix;
 
     /**
      * list of headers to save for all requests
@@ -83,6 +87,9 @@ public class HttpGlobalSettings {
      */
     public static final String[] globalBodyMask;
 
+    /**
+     * http-methods to include request body in request key (case-sensitive)
+     */
     public static final String[] globalBodyMethods;
 
     static class AnystubCfg {
@@ -91,7 +98,15 @@ public class HttpGlobalSettings {
         public StringOrArray bodyMask = new StringOrArray();
         public StringOrArray bodyMethods = new StringOrArray();
 
+        public boolean testFilePrefix = false;
+
+        /**
+         * reserved for server storage-mode
+         */
         public boolean packagePrefix = false;
+        /**
+         * reserved for server storage-mode
+         */
         public String stubServer = "";
 
         public static class StringOrArray {
@@ -232,7 +247,9 @@ public class HttpGlobalSettings {
                     ", headers=" + Arrays.toString(headers.get()) +
                     ", bodyTrigger=" + Arrays.toString(bodyTrigger.get()) +
                     ", bodyMask=" + Arrays.toString(bodyMask.get()) +
-                    ", prefixPackage=" + packagePrefix +
+                    ", bodyMethods=" + Arrays.toString(bodyMethods.get()) +
+                    ", testFilePrefix=" + testFilePrefix +
+                    ", packagePrefix=" + packagePrefix +
                     ", stubServer='" + stubServer + '\'' +
                     '}';
         }

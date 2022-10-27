@@ -9,13 +9,6 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SettingsUtilTest {
-    @Test
-    @AnyStubId
-    @AnySettingsHttp(bodyTrigger = "local")
-    void bodyRuleTest() {
-        boolean local_glo = SettingsUtil.matchBodyRule("local glo");
-        assertTrue(local_glo);
-    }
 
     @Test
     @AnyStubId

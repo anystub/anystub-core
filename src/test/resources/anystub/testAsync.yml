@@ -1,8 +1,7 @@
-request0:
-  exception: []
-  keys: testAsync
-  values: test
-request1:
-  exception: []
-  keys: testAsync
-  values: testX
+exception: []
+keys: testAsync
+values: test
+---
+exception: []
+keys: testAsync
+values: testX

@@ -5,10 +5,7 @@ import org.anystub.mgmt.MTCache;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -102,10 +99,10 @@ public class AnySettingsHttpExtractor {
         }
 
         if (settings==null || !settings.overrideGlobal()) {
-            headers.addAll(asList(HttpGlobalSettings.globalHeaders));
-            bodyTrigger.addAll(asList(HttpGlobalSettings.globalBodyTrigger));
-            bodyMask.addAll(asList(HttpGlobalSettings.globalBodyMask));
-            bodyMethods.addAll(asList(HttpGlobalSettings.globalBodyMethods));
+            headers.addAll(asList(GlobalSettings.globalHeaders));
+            bodyTrigger.addAll(asList(GlobalSettings.globalBodyTrigger));
+            bodyMask.addAll(asList(GlobalSettings.globalBodyMask));
+            bodyMethods.addAll(asList(GlobalSettings.globalBodyMethods));
         }
 
         boolean overrideGlobalF = overrideGlobal;

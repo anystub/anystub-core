@@ -1,8 +1,7 @@
-request0:
-  exception: []
-  keys: [qwe, stringkey]
-  values: xxx
-request1:
-  exception: [java.util.NoSuchElementException, null]
-  keys: [rand, '1002', notakey]
-  values: []
+exception: []
+keys: [qwe, stringkey]
+values: xxx
+---
+exception: [java.util.NoSuchElementException, null]
+keys: [rand, '1002', notakey]
+values: []
