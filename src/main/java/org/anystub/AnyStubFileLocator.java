@@ -13,6 +13,7 @@ public class AnyStubFileLocator {
      * If you call it in some functions it tracks stackTrace up to the first method or class annotated
      * with @AnystubId and extracts its parameters
      *
+     *
      * @return runtime data, if no annotation found returns null
      */
     public static AnyStubId discoverFile() {
@@ -32,6 +33,9 @@ public class AnyStubFileLocator {
                     filename = id.filename().isEmpty() ?
                             s.getMethodName() :
                             id.filename();
+                    if (GlobalSettings.testFilePrefix) {
+                        filename = aClass.getSimpleName() + filename;
+                    }
                     break;
                 } else {
                     id = aClass.getDeclaredAnnotation(AnyStubId.class);
@@ -59,6 +63,12 @@ public class AnyStubFileLocator {
                 id.requestMasks());
     }
 
+    /**
+     *
+     * @param s current stack trace element
+     * @param aClass related class for the stack trace element
+     * @return method's annotation
+     */
     private static AnyStubId methodInfo(StackTraceElement s, Class<?> aClass) {
         AnyStubId id;
         try {

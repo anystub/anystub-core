@@ -57,7 +57,7 @@ public class SettingsUtil {
         return maskBody(s, AnySettingsHttpExtractor.httpSettings());
     }
     /**
-     * combines all available rules from HttpGlobalSettings.globalBodyMask and AnySettingsHttp.bodyMask
+     * combines all available rules from GlobalSettings.globalBodyMask and AnySettingsHttp.bodyMask
      * and replace match with ellipsis (...).
      * If rules not specified - no replacements performed
      * @param s string to mask
