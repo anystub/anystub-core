@@ -58,7 +58,7 @@ public @interface AnySettingsHttp {
      * to define regex expressions which will be replaced by elapses "..." in a request body
      * @return
      */
-    String[] bodyMask() default {};
+//    String[] bodyMask() default {};
 
     /**
      * http-methods for which request body will be included in a key of the request

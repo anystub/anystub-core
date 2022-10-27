@@ -77,7 +77,7 @@ public class AnySettingsHttpExtractor {
         boolean allHeaders = false;
         final List<String> headers = new ArrayList<>();
         final List<String> bodyTrigger = new ArrayList<>();
-        final List<String> bodyMask = new ArrayList<>();
+//        final List<String> bodyMask = new ArrayList<>();
         final List<String> bodyMethods = new ArrayList<>();
 
 
@@ -90,18 +90,16 @@ public class AnySettingsHttpExtractor {
             allHeaders = settings.allHeaders();
             headers.addAll(asList(settings.headers()));
             bodyTrigger.addAll(asList(settings.bodyTrigger()));
-            bodyMask.addAll(asList(settings.bodyMask()));
+//            bodyMask.addAll(asList(settings.bodyMask()));
             bodyMethods.addAll(asList(settings.bodyMethods()));
-        }
-
-        if (settings == null) {
+        } else {
             bodyMethods.addAll(asList("POST", "PUT", "DELETE"));
         }
 
         if (settings==null || !settings.overrideGlobal()) {
             headers.addAll(asList(GlobalSettings.globalHeaders));
             bodyTrigger.addAll(asList(GlobalSettings.globalBodyTrigger));
-            bodyMask.addAll(asList(GlobalSettings.globalBodyMask));
+//            bodyMask.addAll(asList(GlobalSettings.globalBodyMask));
             bodyMethods.addAll(asList(GlobalSettings.globalBodyMethods));
         }
 
@@ -136,10 +134,10 @@ public class AnySettingsHttpExtractor {
                 return bodyTrigger.stream().distinct().toArray(String[]::new);
             }
 
-            @Override
-            public String[] bodyMask() {
-                return bodyMask.stream().distinct().toArray(String[]::new);
-            }
+//            @Override
+//            public String[] bodyMask() {
+//                return bodyMask.stream().distinct().toArray(String[]::new);
+//            }
 
             @Override
             public String[] bodyMethods() {

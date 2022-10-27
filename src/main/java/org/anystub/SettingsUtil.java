@@ -54,7 +54,7 @@ public class SettingsUtil {
      * @return masked string
      */
     public static String maskBody(String s) {
-        return maskBody(s, AnySettingsHttpExtractor.httpSettings());
+        return maskBody(s, AnyStubFileLocator.discoverFile());
     }
     /**
      * combines all available rules from GlobalSettings.globalBodyMask and AnySettingsHttp.bodyMask
@@ -64,19 +64,19 @@ public class SettingsUtil {
      * @param settings test settings
      * @return masked string
      */
-    public static String maskBody(String s, AnySettingsHttp settings) {
+    public static String maskBody(String s, AnyStubId settings) {
 
-        if (settings.bodyMask().length==0) {
+        if (settings.requestMasks().length == 0) {
             return s;
         }
 
         String combinedRule;
-        if (settings.bodyMask().length>1) {
-            combinedRule = stream(settings.bodyMask()).
+        if (settings.requestMasks().length>1) {
+            combinedRule = stream(settings.requestMasks()).
                     map(r->String.format("(%s)", r))
                     .collect(Collectors.joining("|"));
         } else {
-            combinedRule = settings.bodyMask()[0];
+            combinedRule = settings.requestMasks()[0];
         }
 
         return s.replaceAll(combinedRule, "...");

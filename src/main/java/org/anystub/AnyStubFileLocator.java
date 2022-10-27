@@ -2,6 +2,9 @@ package org.anystub;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 public class AnyStubFileLocator {
 
@@ -58,9 +61,16 @@ public class AnyStubFileLocator {
             filename += ".yml";
         }
 
+        String [] effectiveMasks = id.requestMasks();
+        if (GlobalSettings.globalRequestMask.length > 0) {
+            List<String> strings = asList(effectiveMasks);
+            strings.addAll(asList(GlobalSettings.globalRequestMask));
+            effectiveMasks = strings.stream().distinct().toArray(String[]::new);
+        }
+
         return new AnyStubIdData(filename,
                 id.requestMode(),
-                id.requestMasks());
+                effectiveMasks);
     }
 
     /**
