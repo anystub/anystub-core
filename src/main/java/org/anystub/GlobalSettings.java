@@ -27,7 +27,7 @@ public class GlobalSettings {
         testFilePrefix = load.testFilePrefix;
         globalHeaders = load.headers.get();
         globalBodyTrigger = load.bodyTrigger.get();
-        globalBodyMask = load.bodyMask.get();
+        globalRequestMask = load.requestMask.get();
         globalBodyMethods = load.bodyMethods.get();
     }
 
@@ -48,8 +48,8 @@ public class GlobalSettings {
             if(anystubCfg.bodyTrigger == null) {
                 anystubCfg.bodyTrigger = new AnystubCfg.StringOrArray();
             }
-            if(anystubCfg.bodyMask == null) {
-                anystubCfg.bodyMask = new AnystubCfg.StringOrArray();
+            if(anystubCfg.requestMask == null) {
+                anystubCfg.requestMask = new AnystubCfg.StringOrArray();
             }
             if(anystubCfg.bodyMethods == null) {
                 anystubCfg.bodyMethods = new AnystubCfg.StringOrArray();
@@ -85,7 +85,7 @@ public class GlobalSettings {
      * pattern, to cut off out of the request body when saves in stub
      * Use it to cut off variable part of the request body: ex. timestamp, random sequences, secrets
      */
-    public static final String[] globalBodyMask;
+    public static final String[] globalRequestMask;
 
     /**
      * http-methods to include request body in request key (case-sensitive)
@@ -95,7 +95,7 @@ public class GlobalSettings {
     static class AnystubCfg {
         public StringOrArray headers = new StringOrArray();
         public StringOrArray bodyTrigger = new StringOrArray();
-        public StringOrArray bodyMask = new StringOrArray();
+        public StringOrArray requestMask = new StringOrArray();
         public StringOrArray bodyMethods = new StringOrArray();
 
         public boolean testFilePrefix = false;
@@ -246,7 +246,7 @@ public class GlobalSettings {
             return "AnystubCfg{" +
                     ", headers=" + Arrays.toString(headers.get()) +
                     ", bodyTrigger=" + Arrays.toString(bodyTrigger.get()) +
-                    ", bodyMask=" + Arrays.toString(bodyMask.get()) +
+                    ", requestMask=" + Arrays.toString(requestMask.get()) +
                     ", bodyMethods=" + Arrays.toString(bodyMethods.get()) +
                     ", testFilePrefix=" + testFilePrefix +
                     ", packagePrefix=" + packagePrefix +

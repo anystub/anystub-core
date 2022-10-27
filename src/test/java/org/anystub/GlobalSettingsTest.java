@@ -11,13 +11,13 @@ class GlobalSettingsTest {
     @Test
     void testNotExistCfg() {
         GlobalSettings.AnystubCfg load = GlobalSettings.load("src/test/resources/test-doesnot-exist.yml");
-        Assertions.assertArrayEquals(new String[0], load.bodyMask.get());
+        Assertions.assertArrayEquals(new String[0], load.requestMask.get());
     }
 
     @Test
     void testWrongProp() {
         GlobalSettings.AnystubCfg load = GlobalSettings.load("src/test/resources/test.yml");
-        Assertions.assertArrayEquals(new String[0], load.bodyMask.get());
+        Assertions.assertArrayEquals(new String[0], load.requestMask.get());
     }
 
     @Test
@@ -25,13 +25,16 @@ class GlobalSettingsTest {
         GlobalSettings.AnystubCfg load = GlobalSettings.load("src/test/resources/test1.yml");
         Assertions.assertArrayEquals(new String[]{"headers"}, load.headers.get());
         Assertions.assertArrayEquals(new String[]{""}, load.bodyTrigger.get());
-        Assertions.assertArrayEquals(new String[]{"password: .{2,10}\\,"}, load.bodyMask.get());
+        Assertions.assertArrayEquals(new String[]{"password: .{2,10}\\,"}, load.requestMask.get());
     }
 
     @Test
     void testEmptyAsNone() {
         GlobalSettings.AnystubCfg load = GlobalSettings.load("src/test/resources/test2.yml");
+        Assertions.assertArrayEquals(new String[0], load.headers.get());
         Assertions.assertArrayEquals(new String[0], load.bodyTrigger.get());
+        Assertions.assertArrayEquals(new String[0], load.requestMask.get());
+        Assertions.assertArrayEquals(new String[0], load.bodyMethods.get());
 
         Assertions.assertFalse(load.testFilePrefix);
     }
@@ -45,7 +48,7 @@ class GlobalSettingsTest {
                 "test",
                 "test2",
                 "test4"
-        }, load.bodyMask.get());
+        }, load.requestMask.get());
         load = GlobalSettings.load("src/test/resources/test4.yml");
         assertNotNull(load);
         load = GlobalSettings.load("src/test/resources/test5.yml");
