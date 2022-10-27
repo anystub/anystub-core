@@ -46,7 +46,10 @@ public class BaseTest {
 
         base.put("123", "321", "123123");
         base.put("1231", "321", "123123");
-        assertEquals("123123", base.get("123", "321"));
+        assertEquals("123123", base
+                .getVals("123", "321")
+                .iterator()
+                .next());
         base.save();
 
         base.clear();
@@ -84,11 +87,6 @@ public class BaseTest {
         assertEquals("-1594594225", rand);
 
         assertFalse(base.isNew());
-
-        String[] rands = base.requestArray(Base::throwNSE, "rand", "1002");
-
-        assertEquals("-1594594225", rands[0]);
-        assertEquals("asdqwe", rands[1]);
 
         int val = base.request2(Base::throwNSE,
                 values -> parseInt(values.iterator().next()),
@@ -370,12 +368,12 @@ public class BaseTest {
                 .getBase("./nullReturning.yml");
         base.clear();
 
-        String[] emptyResult = base.requestArray(() -> null,
+        Integer emptyResult = base.requestI(() -> null,
                 "nullKey");
 
         assertNull(emptyResult);
 
-        emptyResult = base.requestArray(() -> {
+        emptyResult = base.requestI(() -> {
                     throw new NoSuchElementException();
                 },
                 "nullKey");
@@ -383,12 +381,6 @@ public class BaseTest {
 
         assertNull(base.request("nullKey"));
 
-        String[] singleItemArray = base.requestArray(() -> new String[]{null},
-                "nullArray");
-
-        assertNotNull(singleItemArray);
-        assertEquals(1, singleItemArray.length);
-        assertNull(singleItemArray[0]);
 
     }
 

@@ -20,7 +20,8 @@ public class BaseManagerImplTest {
         BaseManagerImpl.instance().getBase("test1.yml");
 
         new Base( "test2.yml");
-        BaseManagerImpl.instance().getBase("test2.yml");
+        Base base = BaseManagerImpl.instance().getBase("test2.yml");
+        assertTrue(base.isNew());
 
     }
 

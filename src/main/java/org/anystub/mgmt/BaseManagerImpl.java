@@ -58,7 +58,6 @@ public class BaseManagerImpl implements BaseManager {
         return list.computeIfAbsent(fullPath, p -> {
                 Base base = new Base(fullPath);
                 initializer.accept(base);
-                stubInitialization(base);
                 return base;
         });
     }
@@ -99,18 +98,6 @@ public class BaseManagerImpl implements BaseManager {
         }
 
         return getBase();
-    }
-
-
-    @Deprecated
-    /**
-     * BaseManager calls it when creates a new stub
-     *
-     * migration: use initializer in `getBase(String filename, Consumer<Base> initializer)`
-     * @deprecated since = "0.9.3"
-     */
-    protected void stubInitialization(Base newStub) {
-        // default initializer does nothing
     }
 
 }

@@ -14,18 +14,6 @@ public class SettingsUtil {
     /**
      * checks if URL should trigger saving request body
      * finds settings in the stack
-     * @param url url to test
-     * @return
-     * @deprecated
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean matchBodyRule(String url) {
-        return matchBodyRule("POST", url, AnySettingsHttpExtractor.httpSettings());
-    }
-
-    /**
-     * checks if URL should trigger saving request body
-     * finds settings in the stack
      * @param method method of the request
      * @param url url to test
      * @return true if method and url match setting

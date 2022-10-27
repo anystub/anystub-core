@@ -159,17 +159,6 @@ public class Base {
                 .findFirst();
     }
 
-    /**
-     * returns Finds entity in a stub using the key. returns 1st value string
-     *
-     * @param keys keys to find request
-     * @return
-     * @deprecated since = "0.7.0"
-     */
-    @Deprecated(since = "0.7.0")
-    public String get(String... keys) {
-        return getVals(keys).iterator().next();
-    }
 
     /**
      * Finds document with the given key. If document found then returns iterator to the values from the document
@@ -349,44 +338,6 @@ public class Base {
                 StringUtil::decode,
                 StringUtil::encode,
                 keys);
-    }
-
-    /**
-     * Requests an array of string from stub.
-     * If this document is absent in cache throws {@link NoSuchElementException}
-     *
-     * @param keys keys for searching response in stub
-     * @param <E>  type of allowed Exception
-     * @return requested response
-     * @throws E if document if not found in cache
-     * @deprecated use request instead
-     */
-    @Deprecated(since = "0.7.0")
-    public <E extends Exception> String[] requestArray(String... keys) throws E {
-        return request2(Base::throwNSE,
-                values -> values == null ? null : StreamSupport.stream(values.spliterator(), false).collect(Collectors.toList()).toArray(new String[0]),
-                Base::throwNSE,
-                keys);
-
-    }
-
-    /**
-     * Requests an array of string.
-     *
-     * @param supplier provide string array from system
-     * @param keys     keys for request
-     * @param <E>      expected exception
-     * @return string array. it could be null;
-     * @throws E expected exception
-     * @deprecated use request instead
-     */
-    @Deprecated(since = "0.7.0")
-    public <E extends Exception> String[] requestArray(Supplier<String[], E> supplier, String... keys) throws E {
-        return request2(supplier,
-                values -> values == null ? null : StreamSupport.stream(values.spliterator(), false).collect(Collectors.toList()).toArray(new String[0]),
-                Arrays::asList,
-                keys);
-
     }
 
     /**
