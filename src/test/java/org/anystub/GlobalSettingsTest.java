@@ -31,7 +31,10 @@ class GlobalSettingsTest {
     @Test
     void testEmptyAsNone() {
         GlobalSettings.AnystubCfg load = GlobalSettings.load("src/test/resources/test2.yml");
+        Assertions.assertArrayEquals(new String[0], load.headers.get());
         Assertions.assertArrayEquals(new String[0], load.bodyTrigger.get());
+        Assertions.assertArrayEquals(new String[0], load.requestMask.get());
+        Assertions.assertArrayEquals(new String[0], load.bodyMethods.get());
 
         Assertions.assertFalse(load.testFilePrefix);
     }

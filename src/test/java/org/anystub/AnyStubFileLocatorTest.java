@@ -26,4 +26,11 @@ public class AnyStubFileLocatorTest {
 
     }
 
+    @Test
+    @AnyStubId(filename = "test.yml")
+    public void testExtname() {
+        assertEquals("test.yml", AnyStubFileLocator.discoverFile().filename());
+
+    }
+
 }

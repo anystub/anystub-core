@@ -1,4 +1,5 @@
-allHeaders: true
+allHeaders:
 headers:
 bodyTrigger:
-bodyMask:
+requestMask:
+bodyMethods:
