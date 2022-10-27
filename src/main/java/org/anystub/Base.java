@@ -667,7 +667,6 @@ public class Base {
             options.setExplicitStart(true);
 
             Yaml yaml = new Yaml(new DocumentRepresent(options));
-//            yaml.addImplicitResolver(Tag.MAP, Pattern.compile(""),"");
             yaml.dumpAll(documentList.iterator(), output);
 
         }
