@@ -31,6 +31,8 @@ public class GlobalSettings {
         globalBodyMethods = load.bodyMethods.get();
     }
 
+    private GlobalSettings() {
+    }
 
     public static AnystubCfg load(String s) {
         try (InputStream input = new FileInputStream(s)) {

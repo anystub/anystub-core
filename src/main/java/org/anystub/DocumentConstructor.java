@@ -17,6 +17,7 @@ public class DocumentConstructor extends Constructor {
     }
 
     private class ConstructDocument extends ConstructYamlMap {
+        @Override
         public Object construct(Node node) {
 
             Object val = super.construct(node);
