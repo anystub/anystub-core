@@ -1,6 +1,7 @@
 package org.anystub;
 
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -33,19 +34,23 @@ public class SettingsUtil {
         if(!asList(settings.bodyMethods()).contains(httpMethod)) {
             return false;
         }
-        if (stream(settings.bodyTrigger())
-                .filter(rule -> rule.startsWith("-"))
-                .anyMatch(rule -> url.contains(rule.substring(1)))){
-            return false;
-        }
 
-        if (settings.bodyTrigger().length == 0 ) {
-            return true;
+        List<String> matchTrigger = stream(settings.bodyTrigger())
+                .filter(rule -> !rule.startsWith("-"))
+                .collect(Collectors.toList());
+
+        if (!matchTrigger.isEmpty()) {
+            boolean b = matchTrigger
+                    .stream().anyMatch(url::contains);
+            if (!b) {
+                return false;
+            }
         }
 
         return stream(settings.bodyTrigger())
-                .filter(rule -> !rule.startsWith("-"))
-                .anyMatch(url::contains);
+                .filter(rule -> rule.startsWith("-"))
+                .map(rule -> rule.substring(1))
+                .noneMatch(url::contains);
     }
 
     /**

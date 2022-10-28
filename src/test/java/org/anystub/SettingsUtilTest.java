@@ -40,6 +40,26 @@ class SettingsUtilTest {
 
     @Test
     @AnyStubId
+    @AnySettingsHttp(bodyTrigger = "-auth")
+    void testExcludeSpecificPostBodyMethod() {
+        boolean local_glo;
+        local_glo = SettingsUtil.matchBodyRule("POST", "local glo");
+        assertTrue(local_glo);
+
+        local_glo = SettingsUtil.matchBodyRule("POST", "auth");
+        assertFalse(local_glo);
+    }
+
+    @Test
+    @AnyStubId
+    @AnySettingsHttp(bodyTrigger = {"local", "-auth"})
+    void methodSelectiveBodyTest() {
+        boolean local_glo = SettingsUtil.matchBodyRule("POST", "local auth");
+        assertFalse(local_glo);
+    }
+
+    @Test
+    @AnyStubId
     void testDefaultPostBodyInclude() {
         boolean local_glo;
         local_glo = SettingsUtil.matchBodyRule("POST", "local glo");
@@ -52,6 +72,7 @@ class SettingsUtilTest {
         boolean local_glo;
         local_glo = SettingsUtil.matchBodyRule("POST", "api/test");
         assertTrue(local_glo);
+
         local_glo = SettingsUtil.matchBodyRule("POST", "auth");
         assertFalse(local_glo);
     }
