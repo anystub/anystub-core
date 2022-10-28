@@ -29,7 +29,6 @@ import static org.anystub.Document.ars;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -37,10 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  *
  */
-public class BaseTest {
+class BaseTest {
 
     @Test
-    public void testSave() throws IOException {
+    void testSave() throws IOException {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./stubSaveTest.yml");
 
@@ -69,7 +68,7 @@ public class BaseTest {
 
 
     @Test
-    public void testStringRequest() {
+    void testStringRequest() {
         Base base = BaseManagerFactory.getBaseManager().getBase();
         String request = base.request(() -> "xxx", "qwe", "stringkey");
 
@@ -77,7 +76,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testRequest() {
+    void testRequest() {
         Base base = BaseManagerFactory.getBaseManager().getBase("request.yml");
         base.clear();
         assertTrue(base.isNew());
@@ -109,7 +108,7 @@ public class BaseTest {
     }
 
     @Test()
-    public void testRequestException() {
+    void testRequestException() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase();
         base.clear();
@@ -121,7 +120,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testBinaryDataTest() {
+    void testBinaryDataTest() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./stubBin.yml");
         base.clear();
@@ -164,7 +163,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testRestrictionTest() {
+    void testRestrictionTest() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("restrictionTest.yml");
         base.clear();
@@ -203,7 +202,7 @@ public class BaseTest {
 
 
     @Test
-    public void testRequestNull() {
+    void testRequestNull() {
 
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./NullObj.yml");
@@ -216,7 +215,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testRequestComplexObject() {
+    void testRequestComplexObject() {
         Human h = new Human(13, 180, 30, 60, "i'm");
 
         Base base = BaseManagerFactory.getBaseManager()
@@ -268,7 +267,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testHistoryCheck() {
+    void testHistoryCheck() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./historyCheck.yml");
         base.clear();
@@ -293,7 +292,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testNullMatching() {
+    void testNullMatching() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./historyCheck.yml");
         base.clear();
@@ -311,7 +310,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testRegexpMatching() {
+    void testRegexpMatching() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./historyCheck.yml");
         base.clear();
@@ -334,7 +333,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testExceptionTest() {
+    void testExceptionTest() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./exceptionStub.yml");
         base.clear();
@@ -363,7 +362,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testNullReturning() {
+    void testNullReturning() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./nullReturning.yml");
         base.clear();
@@ -385,7 +384,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testRequest_oneway_object() throws IOException {
+    void testRequest_oneway_object() throws IOException {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./streams.yml")
                 .constrain(RequestMode.rmAll);
@@ -415,7 +414,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testRequestSerializableTest() {
+    void testRequestSerializableTest() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./serialize.yml");
         base.clear();
@@ -429,7 +428,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testFileInResourcesTest() {
+    void testFileInResourcesTest() {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("in-res.yml");
         base.clear();
@@ -439,7 +438,7 @@ public class BaseTest {
     }
 
     @Test
-    public void testPunctuationInStub() {
+    void testPunctuationInStub() {
 
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./punctuation.yml");
@@ -453,7 +452,7 @@ public class BaseTest {
 
     @RepeatedTest(1)
     @AnyStubId(requestMode = RequestMode.rmAll)
-    public void testRequestO() {
+    void testRequestO() {
         Base locate = BaseManagerFactory.locate();
         String s;
         s = locate.request(() -> "test", String.class, "method", null, "another key");

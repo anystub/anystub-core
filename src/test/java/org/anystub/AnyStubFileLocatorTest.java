@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @AnyStubId
-public class AnyStubFileLocatorTest {
+class AnyStubFileLocatorTest {
 
     @Test
     @AnyStubId

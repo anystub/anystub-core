@@ -34,9 +34,9 @@ public @interface AnySettingsHttp {
     String[] headers() default {};
 
     /**
-     * to define pattern which triggers inclusion a request body in a key for selected http Methods
-     * request body includes in a key if any of these strings is a substring of URL
-     * if not defined non-empty request body will be included for every call with http-methods defined in bodyMethods
+     * to define pattern which triggers inclusion a request body in a key for selected http Methods defined in bodyMethods
+     * if not defined - request body includes for all requests
+     * if URL includes any of the substrings the request body is included in the key
      * example:
      *  '@AnySettingsHttp(bodyTrigger = "random")'
      *  the request to https://gturnquist-quoters.cfapps.io:443/api/randomX will be recorded with request body
@@ -45,6 +45,7 @@ public @interface AnySettingsHttp {
      * "-" (dash) at start excludes given requests from recording with body
      *  '@AnySettingsHttp(bodyTrigger = {"-auth", "random"})'
      *  the request to https://gturnquist-quoters.cfapps.io:443/api/randomX will be recorded with request body
+     *  the request to https://gturnquist-quoters.cfapps.io:443/auth/random will be recorded without request body
      *  the request to https://gturnquist-quoters.cfapps.io:443/api/any will be recorded without request body
      *  the request to https://gturnquist-random.cfapps.io:443/auth will be recorded without request body
      *
