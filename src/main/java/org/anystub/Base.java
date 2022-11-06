@@ -17,13 +17,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -46,10 +46,13 @@ import static org.anystub.RequestMode.rmTrack;
 public class Base {
 
     private static final Logger log = Logger.getLogger(Base.class.getName());
-    private final ConcurrentLinkedQueue<Document> documentList = new ConcurrentLinkedQueue<>();
+    private final DocumentList documentList = new DocumentList();
     private Iterator<Document> documentListTrackIterator;
     private final List<Document> requestHistory = new ArrayList<>();
     private final String filePath;
+    /**
+     * shows if any document already saved in the file
+     */
     private boolean isNew = true;
     private RequestMode requestMode = rmNew;
 
@@ -82,7 +85,7 @@ public class Base {
                     init();
                     break;
                 case rmAll:
-                    isNew = false;
+                    purge();
                     break;
                 case rmTrack:
                     init();
@@ -113,7 +116,11 @@ public class Base {
      */
     public Document put(Document document) {
         documentList.add(document);
-        isNew = false;
+        try {
+            save(document);
+        } catch (IOException e) {
+            log.severe(String.format("failed to record %s: %s", document.key_to_string(), e.getMessage()));
+        }
         return document;
     }
 
@@ -151,10 +158,8 @@ public class Base {
      * @return first value from document's response or empty
      */
     public Optional<String> getOpt(String... keys) {
-        return documentList.stream()
-                .filter(x -> x.keyEqual_to(keys))
-                .map(Document::get)
-                .findFirst();
+        return documentList.getDocument(keys)
+                .map(Document::get);
     }
 
 
@@ -172,9 +177,7 @@ public class Base {
     }
 
     private Optional<Document> getDocument(String... keys) {
-        return documentList.stream()
-                .filter(x -> x.keyEqual_to(keys))
-                .findFirst();
+        return documentList.getDocument(keys);
     }
 
     /**
@@ -511,11 +514,6 @@ public class Base {
         } catch (Throwable ex) {
             Document exceptionalDocument = put(ex, keyGenCashed.get());
             requestHistory.add(exceptionalDocument);
-            try {
-                save();
-            } catch (IOException ioEx) {
-                log.warning(() -> "exception information is not saved into stub: " + ioEx);
-            }
             throw ex;
         }
 
@@ -538,11 +536,6 @@ public class Base {
             retrievedDocument = new Document(keyGenCashed.get(), values.toArray(new String[0]));
             put(retrievedDocument);
             requestHistory.add(retrievedDocument);
-            try {
-                save();
-            } catch (IOException ex) {
-                log.warning(() -> "document is not saved into stub: " + ex);
-            }
             return decoder.decode(responseData);
         });
     }
@@ -558,6 +551,9 @@ public class Base {
      * reloads stub-file - IOException exceptions are suppressed
      */
     private void init() {
+        if (requestMode == rmAll) {
+            return;
+        }
         try {
             load();
         } catch (IOException e) {
@@ -583,22 +579,22 @@ public class Base {
             load.forEach(d -> {
                 if (d instanceof Document) {
                     documentList.add((Document) d);
+                    isNew = false;
                 }
             });
-            isNew = false;
         } catch (FileNotFoundException e) {
-            isNew = false;
             log.info(() -> String.format("stub file %s is not found: %s", file.getAbsolutePath(), e));
         }
     }
 
 
     /**
-     * rewrites stub-file
-     *
-     * @throws IOException due to file access error
+     * saves document into current stub file
+     * append document at the end, if stub marks as new override existing file
+     * @param document document to add
+     * @throws IOException
      */
-    public void save() throws IOException {
+    private void save(Document document) throws IOException {
         File file = new File(filePath);
         File path = file.getParentFile();
 
@@ -608,15 +604,22 @@ public class Base {
             log.info(() -> "dirs created");
         }
 
-        try (FileOutputStream out = new FileOutputStream(file);
-            OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+        boolean doAppend = !isNew;
+        try (FileOutputStream out = new FileOutputStream(file, doAppend);
+             OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 
+            if (doAppend) {
+                output.append("---\n");
+            }
 
             DumperOptions options = new DumperOptions();
             options.setExplicitStart(true);
+            options.setExplicitEnd(true);
 
             Yaml yaml = new Yaml(new DocumentRepresent(options));
-            yaml.dumpAll(documentList.iterator(), output);
+            yaml.dump(document, output);
+            isNew = false;
+
 
         }
     }
@@ -639,6 +642,17 @@ public class Base {
         documentList.clear();
         requestHistory.clear();
         isNew = true;
+    }
+
+    public void purge() {
+        clear();
+
+        try {
+            Files.deleteIfExists(new File(getFilePath()).toPath());
+        } catch (IOException e) {
+            log.finest("no file deleted on purge for: "+getFilePath());
+        }
+
     }
 
     /**

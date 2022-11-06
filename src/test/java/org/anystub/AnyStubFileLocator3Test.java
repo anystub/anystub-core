@@ -31,7 +31,5 @@ class AnyStubFileLocator3Test {
                 .iterator()
                 .next();
         assertEquals("222", ones);
-
-
     }
 }

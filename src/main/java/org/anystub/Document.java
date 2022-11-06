@@ -1,11 +1,14 @@
 package org.anystub;
 
+import javax.print.Doc;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -37,8 +40,9 @@ public class Document {
     }
 
     public Document(Throwable ex, String... keys) {
-        stream(keys)
-                .forEach(this.keys::add);
+        this.keys.addAll(asList(keys));
+//        stream(keys)
+//                .forEach(this.keys::add);
 
         this.exception.add(ex.getClass().getCanonicalName());
         this.exception.add(ex.getMessage());
@@ -56,6 +60,10 @@ public class Document {
     public Document(String[] keys, String[] values) {
         this.keys.addAll(asList(keys));
         this.values.addAll(asList(values));
+    }
+
+    public List<String> getKey() {
+        return new DocumentKey(this.keys);
     }
 
     /**
@@ -156,7 +164,7 @@ public class Document {
     /**
      * exact matching the document to given key.
      * the document is not matched to 'keys' if:
-     * - it has less values in key then argument array
+     * - it has fewer values in key then argument array
      * - it has at least one value in its key that's not equal to correspondent non-null value in argument array
      * * null values in argument array aren't used for matching
      *
@@ -170,7 +178,7 @@ public class Document {
     /**
      * exact matching a List to given matchedKeys.
      * the baseList is not matched to 'matchedKeys' if:
-     * - it has less values in then matchedKeys
+     * - it has fewer values in then matchedKeys
      * - it has at least one value in its key that's not equal to correspondent non-null value in matchedKeys
      * * null values in matchedKeys aren't used for matching
      *
@@ -457,5 +465,23 @@ public class Document {
 
     }
 
+    public static class DocumentKey extends AbstractList<String> {
+
+        private final List<String> list;
+
+        public DocumentKey(List<String> list) {
+            this.list = list;
+        }
+
+        @Override
+        public String get(int index) {
+            return list.get(index);
+        }
+
+        @Override
+        public int size() {
+            return list.size();
+        }
+    }
 
 }
