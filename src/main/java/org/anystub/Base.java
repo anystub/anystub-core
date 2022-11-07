@@ -457,6 +457,18 @@ public class Base {
                                                Decoder<T> decoder,
                                                Inverter<T> inverter,
                                                KeysSupplier keyGen) throws E {
+        T t;
+        synchronized (request2lock) {
+            t = request2Synchronized(supplier, decoder, inverter, keyGen);
+        }
+
+        return t;
+    }
+
+    private <T, E extends Throwable> T request2Synchronized(Supplier<T, E> supplier,
+                                                            Decoder<T> decoder,
+                                                            Inverter<T> inverter,
+                                                            KeysSupplier keyGen) throws E {
 
         if (requestMode == rmPassThrough) {
             return supplier.get();
@@ -536,9 +548,6 @@ public class Base {
      * NB: IOException exceptions are suppressed
      */
     private void init() {
-        if (requestMode == rmAll) {
-            return;
-        }
         try {
             load();
         } catch (IOException e) {
