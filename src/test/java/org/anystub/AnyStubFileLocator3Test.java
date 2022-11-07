@@ -10,12 +10,12 @@ class AnyStubFileLocator3Test {
 
     {
         Base stub = BaseManagerFactory.getBaseManager().getStub();
-        stub.put("aaa", "bbb");
+        stub.put(Document.fromArray("aaa", "bbb"));
     }
 
     static {
         Base stub = BaseManagerFactory.getBaseManager().getStub();
-        stub.put("111", "222");
+        stub.put(Document.fromArray("111", "222"));
     }
 
     @Test
@@ -31,7 +31,5 @@ class AnyStubFileLocator3Test {
                 .iterator()
                 .next();
         assertEquals("222", ones);
-
-
     }
 }

@@ -86,23 +86,14 @@ public class AnyStubFileLocator {
      * @return method's annotation
      */
     private static AnyStubId methodInfo(StackTraceElement s, Class<?> aClass) {
-        AnyStubId id;
-        try {
-            Method method;
-            method = aClass.getDeclaredMethod(s.getMethodName());
-            id = method.getAnnotation(AnyStubId.class);
-        } catch (NoSuchMethodException ignored) {
-            id = null;
-        }
-        if (id == null) {
-            Method methodStream = Arrays.stream(aClass.getDeclaredMethods())
-                    .filter(method -> method.getName().equals(s.getMethodName()))
-                    .filter(method -> method.getAnnotation(AnyStubId.class) != null)
-                    .findAny().orElse(null);
+        AnyStubId id=null;
+        Method methodStream = Arrays.stream(aClass.getDeclaredMethods())
+                .filter(method -> method.getName().equals(s.getMethodName()))
+                .filter(method -> method.getAnnotation(AnyStubId.class) != null)
+                .findAny().orElse(null);
 
-            if (methodStream != null) {
-                id = methodStream.getAnnotation(AnyStubId.class);
-            }
+        if (methodStream != null) {
+            id = methodStream.getAnnotation(AnyStubId.class);
         }
         return id;
     }

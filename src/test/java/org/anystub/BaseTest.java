@@ -43,13 +43,12 @@ class BaseTest {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./stubSaveTest.yml");
 
-        base.put("123", "321", "123123");
-        base.put("1231", "321", "123123");
+        base.put(Document.fromArray("123", "321", "123123"));
+        base.put(Document.fromArray("1231", "321", "123123"));
         assertEquals("123123", base
                 .getVals("123", "321")
                 .iterator()
                 .next());
-        base.save();
 
         base.clear();
         Optional<String> opt = base.getOpt("123", "321");
@@ -388,8 +387,7 @@ class BaseTest {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./streams.yml")
                 .constrain(RequestMode.rmAll);
-        base.clear();
-        base.save();
+        base.purge();
 
 
         BufferedReader v1 = base.request(
@@ -470,7 +468,6 @@ class BaseTest {
         Base locate = new Base("src/test/resources/anystub/testCS.yml");
         String s = locate.request(() -> "Привет привет", String.class, 1);
         assertEquals("Привет привет", s);
-        locate.save();
 
         locate = new Base("src/test/resources/anystub/testCS.yml").constrain(RequestMode.rmNone);
         s = locate.request(() -> "Привет привет", String.class, 1);
@@ -514,8 +511,7 @@ class BaseTest {
 
         AtomicInteger realCalls = new AtomicInteger();
 
-        Files.deleteIfExists(new File(BaseManagerFactory.locate().getFilePath()).toPath());
-        BaseManagerFactory.locate().clear();
+        BaseManagerFactory.locate().purge();
 
         try (AutoCloseable x = MTCache.setMtFallback()) {
             CompletableFuture<String> resp = CompletableFuture.supplyAsync(() -> {

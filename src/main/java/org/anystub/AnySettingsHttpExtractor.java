@@ -39,20 +39,12 @@ public class AnySettingsHttpExtractor {
             if (aClass == null) {
                 continue;
             }
-            try {
-                Method method;
-                method = aClass.getDeclaredMethod(s.getMethodName());
-                id = method.getAnnotation(AnySettingsHttp.class);
-            } catch (NoSuchMethodException ignored) {
-            }
-            if (id == null) {
-                Method methodStream = stream(aClass.getDeclaredMethods())
-                        .filter(method -> method.getName().equals(s.getMethodName()))
-                        .filter(method -> method.getAnnotation(AnySettingsHttp.class) != null)
-                        .findAny().orElse(null);
-                if (methodStream != null) {
-                    id = methodStream.getAnnotation(AnySettingsHttp.class);
-                }
+            Method methodStream = stream(aClass.getDeclaredMethods())
+                    .filter(method -> method.getName().equals(s.getMethodName()))
+                    .filter(method -> method.getAnnotation(AnySettingsHttp.class) != null)
+                    .findAny().orElse(null);
+            if (methodStream != null) {
+                id = methodStream.getAnnotation(AnySettingsHttp.class);
             }
             if (id != null) {
                 break;

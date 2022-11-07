@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
@@ -213,5 +214,16 @@ class DocumentTest {
         Document document = new Document(data);
 
         Assertions.assertThrows(RuntimeException.class, document::getVals);
+    }
+
+    @Test
+    void testKeys() {
+        List<String> l1 = Document.fromArray("123", "321", "test").getKey();
+        List<String> l2 = Document.fromArray("123", "321", "test").getKey();
+        List<String> l3 = Document.fromArray("123", null, "test").getKey();
+
+        Assertions.assertEquals(l1,l2);
+        Assertions.assertEquals(l1.hashCode(),l2.hashCode());
+        Assertions.assertNotEquals(l1,l3);
     }
 }

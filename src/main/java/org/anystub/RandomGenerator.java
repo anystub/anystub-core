@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class RandomGenerator {
 
     private static final Logger log = Logger.getLogger(RandomGenerator.class.getName());
-    private static final Random random = new Random();
+    private static Random random = new Random();
 
     private RandomGenerator() {
     }
@@ -81,7 +81,7 @@ public class RandomGenerator {
             return (R) o;
         }
         if (genClass.equals(boolean.class)) {
-            Object o = random.nextBoolean();
+            Object o = getRandom().nextBoolean();
             return (R) o;
         }
         if (genClass.equals(double.class)) {
@@ -124,8 +124,8 @@ public class RandomGenerator {
             return (R) (Byte) (byte) gInt();
         }
         if (genClass.equals(byte[].class)) {
-            byte[] n = new byte[random.nextInt(10) + 10];
-            random.nextBytes(n);
+            byte[] n = new byte[getRandom().nextInt(10) + 10];
+            getRandom().nextBytes(n);
             return (R) n;
         }
         if (genClass.isEnum()) {
@@ -174,9 +174,9 @@ public class RandomGenerator {
     public static String gString() {
         String abc = "ABCDEFG abcdef 1234567890";
         StringBuilder sb = new StringBuilder();
-        int len = random.nextInt(100) + 3;
+        int len = getRandom().nextInt(100) + 3;
         for (int i = 0; i < len; i++) {
-            int p = random.nextInt(abc.length());
+            int p = getRandom().nextInt(abc.length());
             sb.append(abc.charAt(p));
         }
         return sb.toString();
@@ -184,11 +184,11 @@ public class RandomGenerator {
 
     public static double gDouble() {
 
-        return random.nextDouble() * 100;
+        return getRandom().nextDouble() * 100;
     }
 
     public static int gInt() {
-        return random.nextInt();
+        return getRandom().nextInt();
     }
 
     public static LocalDate gDate() {
@@ -201,10 +201,10 @@ public class RandomGenerator {
 
     public static OffsetDateTime gOffsetDateTime() {
         return OffsetDateTime.now()
-                .plusDays(random.nextInt(100) - 200L)
-                .plusHours(random.nextInt(3))
-                .plusMinutes(random.nextInt(10))
-                .plusSeconds(random.nextInt(60));
+                .plusDays(getRandom().nextInt(100) - 200L)
+                .plusHours(getRandom().nextInt(3))
+                .plusMinutes(getRandom().nextInt(10))
+                .plusSeconds(getRandom().nextInt(60));
     }
 
     public static OffsetTime gOffsetTime() {
@@ -224,7 +224,7 @@ public class RandomGenerator {
             values = genClass.getDeclaredMethod("values");
             Object invoke = values.invoke(genClass);
             Object[] instances = (Object[]) invoke;
-            return (R) instances[random.nextInt(instances.length)];
+            return (R) instances[getRandom().nextInt(instances.length)];
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             log.finest(() -> String.format("cannot get instance of enum %s", genClass.getName()));
         }
@@ -284,8 +284,8 @@ public class RandomGenerator {
             return (R) (Byte) (byte) gInt();
         }
         if (genClass.equals("byte[]")) {
-            byte[] n = new byte[random.nextInt(10) + 10];
-            random.nextBytes(n);
+            byte[] n = new byte[getRandom().nextInt(10) + 10];
+            getRandom().nextBytes(n);
             return (R) n;
         }
         return null;
@@ -312,4 +312,12 @@ public class RandomGenerator {
         return null;
     }
 
+    public static Random getRandom() {
+        return random;
+    }
+
+    public static Random initRandomizer(int seed) {
+        random = new Random(seed);
+        return random;
+    }
 }
