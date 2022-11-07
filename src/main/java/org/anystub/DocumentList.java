@@ -11,8 +11,8 @@ import static java.util.Arrays.asList;
 
 public class DocumentList {
 
-    ConcurrentLinkedQueue<Document> documentList = new ConcurrentLinkedQueue<>();
-    ConcurrentHashMap<List<String>, Document> x = new ConcurrentHashMap<>();
+    private final ConcurrentLinkedQueue<Document> documentList = new ConcurrentLinkedQueue<>();
+    private final ConcurrentHashMap<List<String>, Document> index = new ConcurrentHashMap<>();
 
     private final Object request2lock = new Object();
 
@@ -27,17 +27,17 @@ public class DocumentList {
     public void add(Document document) {
         synchronized (request2lock) {
             documentList.add(document);
-            x.putIfAbsent(document.getKey(), document);
+            index.putIfAbsent(document.getKey(), document);
         }
     }
 
     public void clear() {
         documentList.clear();
-        x.clear();
+        index.clear();
     }
 
     public Optional<Document> getDocument(String[] keys) {
-        Document document = x.get(new ArrayList<>(asList(keys)));
+        Document document = index.get(new ArrayList<>(asList(keys)));
         return document != null ? Optional.of(document) : Optional.empty();
     }
 

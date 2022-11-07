@@ -87,24 +87,14 @@ public class AnyStubFileLocator {
      */
     private static AnyStubId methodInfo(StackTraceElement s, Class<?> aClass) {
         AnyStubId id=null;
-// commented on purpose - aClass.getDeclaredMethod generates exceptions - which is very time-consuming
-//        try {
-//            Method method;
-//            method = aClass.getDeclaredMethod(s.getMethodName());
-//            id = method.getAnnotation(AnyStubId.class);
-//        } catch (NoSuchMethodException ignored) {
-//            id = null;
-//        }
-//        if (id == null) {
-            Method methodStream = Arrays.stream(aClass.getDeclaredMethods())
-                    .filter(method -> method.getName().equals(s.getMethodName()))
-                    .filter(method -> method.getAnnotation(AnyStubId.class) != null)
-                    .findAny().orElse(null);
+        Method methodStream = Arrays.stream(aClass.getDeclaredMethods())
+                .filter(method -> method.getName().equals(s.getMethodName()))
+                .filter(method -> method.getAnnotation(AnyStubId.class) != null)
+                .findAny().orElse(null);
 
-            if (methodStream != null) {
-                id = methodStream.getAnnotation(AnyStubId.class);
-            }
-//        }
+        if (methodStream != null) {
+            id = methodStream.getAnnotation(AnyStubId.class);
+        }
         return id;
     }
 
