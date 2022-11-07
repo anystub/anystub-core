@@ -1,6 +1,7 @@
 package org.anystub;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,14 @@ public class DocumentList {
     private final ConcurrentHashMap<List<String>, Document> index = new ConcurrentHashMap<>();
 
     private final Object request2lock = new Object();
+
+    public boolean isEmpty() {
+        return documents.isEmpty();
+    }
+
+    public Iterator<Document> iterator() {
+        return documents.iterator();
+    }
 
     public void add(Document document) {
         synchronized (request2lock) {
