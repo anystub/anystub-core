@@ -43,8 +43,8 @@ class BaseTest {
         Base base = BaseManagerFactory.getBaseManager()
                 .getBase("./stubSaveTest.yml");
 
-        base.put("123", "321", "123123");
-        base.put("1231", "321", "123123");
+        base.put(Document.fromArray("123", "321", "123123"));
+        base.put(Document.fromArray("1231", "321", "123123"));
         assertEquals("123123", base
                 .getVals("123", "321")
                 .iterator()

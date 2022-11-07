@@ -116,11 +116,7 @@ public class Base {
      */
     public Document put(Document document) {
         documentList.add(document);
-        try {
-            save(document);
-        } catch (IOException e) {
-            log.severe(String.format("failed to record %s: %s", document.key_to_string(), e.getMessage()));
-        }
+        save(document);
         return document;
     }
 
@@ -130,7 +126,9 @@ public class Base {
      *
      * @param keysAndValue keys for request2
      * @return new Document
+     * @deprecated use Document.fromArray
      */
+    @Deprecated
     public Document put(String... keysAndValue) {
         return put(Document.fromArray(keysAndValue));
     }
@@ -142,7 +140,9 @@ public class Base {
      * @param ex   exception is kept in document
      * @param keys key for the document
      * @return inserted document
+     * @deprecated
      */
+    @Deprecated
     public Document put(Throwable ex, String... keys) {
         return put(new Document(ex, keys));
     }
@@ -446,7 +446,7 @@ public class Base {
      *
      * @param supplier - provides the value from an external system
      * @param decoder  - recovers result from stub
-     * @param inverter  - converts result to strings for stub-file
+     * @param inverter - converts result to strings for stub-file
      * @param keyGen   - provides keys to match requested document
      * @param <T>      - type of requested object
      * @param <E>      - allowed exception
@@ -457,18 +457,6 @@ public class Base {
                                                Decoder<T> decoder,
                                                Inverter<T> inverter,
                                                KeysSupplier keyGen) throws E {
-        T t;
-        synchronized (request2lock) {
-            t = request2Synchronized(supplier, decoder, inverter, keyGen);
-        }
-
-        return t;
-    }
-
-    private <T, E extends Throwable> T request2Synchronized(Supplier<T, E> supplier,
-                                                            Decoder<T> decoder,
-                                                            Inverter<T> inverter,
-                                                             KeysSupplier keyGen) throws E {
 
         if (requestMode == rmPassThrough) {
             return supplier.get();
@@ -477,11 +465,8 @@ public class Base {
 
         log.finest(() -> String.format("request executing: %s", String.join(",", keyGenCashed.get())));
 
-        if (isNew()) {
-            init();
-        }
-
         if (seekInCache()) {
+            init();
 
             Optional<Document> storedDocument = getDocument(keyGenCashed.get());
             if (storedDocument.isPresent()) {
@@ -512,11 +497,10 @@ public class Base {
         try {
             res = supplier.get();
         } catch (Throwable ex) {
-            Document exceptionalDocument = put(ex, keyGenCashed.get());
+            Document exceptionalDocument = put(new Document(ex, keyGenCashed.get()));
             requestHistory.add(exceptionalDocument);
             throw ex;
         }
-
 
         if (res == null) {
             // store values
@@ -548,7 +532,8 @@ public class Base {
     }
 
     /**
-     * reloads stub-file - IOException exceptions are suppressed
+     * loads stub-file if required
+     * NB: IOException exceptions are suppressed
      */
     private void init() {
         if (requestMode == rmAll) {
@@ -563,27 +548,35 @@ public class Base {
 
     /**
      * cleans history, reloads stub-file
+     * if any document is loaded it is marked as non-new
      *
      * @throws IOException due to file access error
      */
     private void load() throws IOException {
-        File file = new File(filePath);
-        try (InputStream inputStream = new FileInputStream(file);
-             InputStreamReader input = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            LoaderOptions options = new LoaderOptions();
+        if (!isNew) {
+            return;
+        }
+        synchronized (request2lock) {
+            if (isNew) {
+                File file = new File(filePath);
+                try (InputStream inputStream = new FileInputStream(file);
+                     InputStreamReader input = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                    LoaderOptions options = new LoaderOptions();
 
-            Yaml yaml = new Yaml(new DocumentConstructor(options));
-            Iterable<Object> load = yaml.loadAll(input);
+                    Yaml yaml = new Yaml(new DocumentConstructor(options));
+                    Iterable<Object> load = yaml.loadAll(input);
 
-            clear();
-            load.forEach(d -> {
-                if (d instanceof Document) {
-                    documentList.add((Document) d);
-                    isNew = false;
+                    clear();
+                    load.forEach(d -> {
+                        if (d instanceof Document) {
+                            documentList.add((Document) d);
+                            isNew = false;
+                        }
+                    });
+                } catch (FileNotFoundException e) {
+                    log.info(() -> String.format("stub file %s is not found: %s", file.getAbsolutePath(), e));
                 }
-            });
-        } catch (FileNotFoundException e) {
-            log.info(() -> String.format("stub file %s is not found: %s", file.getAbsolutePath(), e));
+            }
         }
     }
 
@@ -591,36 +584,40 @@ public class Base {
     /**
      * saves document into current stub file
      * append document at the end, if stub marks as new override existing file
+     *
      * @param document document to add
      * @throws IOException
      */
-    private void save(Document document) throws IOException {
-        File file = new File(filePath);
-        File path = file.getParentFile();
+    private void save(Document document) {
+        synchronized (request2lock) {
+            File file = new File(filePath);
+            File path = file.getParentFile();
 
-        if (path != null
-                && !path.exists()
-                && path.mkdirs()) {
-            log.info(() -> "dirs created");
-        }
-
-        boolean doAppend = !isNew;
-        try (FileOutputStream out = new FileOutputStream(file, doAppend);
-             OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-
-            if (doAppend) {
-                output.append("---\n");
+            if (path != null
+                    && !path.exists()
+                    && path.mkdirs()) {
+                log.info(() -> "dirs created");
             }
 
-            DumperOptions options = new DumperOptions();
-            options.setExplicitStart(true);
-            options.setExplicitEnd(true);
+            boolean doAppend = !isNew;
+            try (FileOutputStream out = new FileOutputStream(file, doAppend);
+                 OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 
-            Yaml yaml = new Yaml(new DocumentRepresent(options));
-            yaml.dump(document, output);
-            isNew = false;
+                if (doAppend) {
+                    output.append("---\n");
+                }
 
+                DumperOptions options = new DumperOptions();
+                options.setExplicitStart(true);
+                options.setExplicitEnd(true);
 
+                Yaml yaml = new Yaml(new DocumentRepresent(options));
+                yaml.dump(document, output);
+                output.flush();
+                isNew = false;
+            } catch (IOException e) {
+                log.severe(String.format("failed to record %s: %s", document.key_to_string(), e.getMessage()));
+            }
         }
     }
 
@@ -650,7 +647,7 @@ public class Base {
         try {
             Files.deleteIfExists(new File(getFilePath()).toPath());
         } catch (IOException e) {
-            log.finest("no file deleted on purge for: "+getFilePath());
+            log.finest("no file deleted on purge for: " + getFilePath());
         }
 
     }
@@ -790,7 +787,6 @@ public class Base {
     }
 
     /**
-     *
      * @return returns true if it is expected to find result in cache before hitting actual system
      */
     public boolean seekInCache() {

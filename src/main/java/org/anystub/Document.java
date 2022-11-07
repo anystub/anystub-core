@@ -41,8 +41,6 @@ public class Document {
 
     public Document(Throwable ex, String... keys) {
         this.keys.addAll(asList(keys));
-//        stream(keys)
-//                .forEach(this.keys::add);
 
         this.exception.add(ex.getClass().getCanonicalName());
         this.exception.add(ex.getMessage());
