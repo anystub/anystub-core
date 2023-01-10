@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -41,7 +40,7 @@ class BaseTest {
     @Test
     void testSave() throws IOException {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./stubSaveTest.yml");
+                .getBase("tmp/stubSaveTest.yml");
 
         base.put(Document.fromArray("123", "321", "123123"));
         base.put(Document.fromArray("1231", "321", "123123"));
@@ -121,7 +120,7 @@ class BaseTest {
     @Test
     void testBinaryDataTest() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./stubBin.yml");
+                .getBase("tmp/stubBin.yml");
         base.clear();
 
         byte[] arr = new byte[256];
@@ -204,7 +203,7 @@ class BaseTest {
     void testRequestNull() {
 
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./NullObj.yml");
+                .getBase("tmp/NullObj.yml");
         Human human = base.request2(() -> null,
                 values -> null,
                 x -> emptyList(),
@@ -218,7 +217,7 @@ class BaseTest {
         Human h = new Human(13, 180, 30, 60, "i'm");
 
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./complexObject.yml");
+                .getBase("tmp/complexObject.yml");
         base.clear();
 
         Human human = base.request2(() -> h,
@@ -268,7 +267,7 @@ class BaseTest {
     @Test
     void testHistoryCheck() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./historyCheck.yml");
+                .getBase("tmp/historyCheck.yml");
         base.clear();
 
         assertEquals(0L, base.times());
@@ -293,7 +292,7 @@ class BaseTest {
     @Test
     void testNullMatching() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./historyCheck.yml");
+                .getBase("tmp/historyCheck.yml");
         base.clear();
         base.constrain(RequestMode.rmNew);
 
@@ -311,7 +310,7 @@ class BaseTest {
     @Test
     void testRegexpMatching() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./historyCheck.yml");
+                .getBase("tmp/historyCheck.yml");
         base.clear();
 
         base.request(() -> "okok", "2222", "3", "3");
@@ -334,7 +333,7 @@ class BaseTest {
     @Test
     void testExceptionTest() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./exceptionStub.yml");
+                .getBase("tmp/exceptionStub.yml");
         base.clear();
 
         boolean exceptionCaught = false;
@@ -363,7 +362,7 @@ class BaseTest {
     @Test
     void testNullReturning() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./nullReturning.yml");
+                .getBase("tmp/nullReturning.yml");
         base.clear();
 
         Integer emptyResult = base.requestI(() -> null,
@@ -385,7 +384,7 @@ class BaseTest {
     @Test
     void testRequest_oneway_object() throws IOException {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./streams.yml")
+                .getBase("tmp/streams.yml")
                 .constrain(RequestMode.rmAll);
         base.purge();
 
@@ -414,7 +413,7 @@ class BaseTest {
     @Test
     void testRequestSerializableTest() {
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./serialize.yml");
+                .getBase("tmp/serialize.yml");
         base.clear();
 
         AAA aaa = base.requestSerializable(() -> new AAA(), "123");
@@ -439,7 +438,7 @@ class BaseTest {
     void testPunctuationInStub() {
 
         Base base = BaseManagerFactory.getBaseManager()
-                .getBase("./punctuation.yml");
+                .getBase("tmp/punctuation.yml");
         base.clear();
 
         String request = base.request(() -> "[][!\"#$%&'()*+,./:;<=>?@\\^_`{|}~-]", "[][!\"#$%&'()*+,./:;<=>?@\\^_`{|}~-]");
@@ -545,5 +544,28 @@ class BaseTest {
     }
 
 
+    @Test
+    void testTrackStub() {
+        Base base = new Base("tmp/TrackStub.yml");
+        new File(base.getFilePath()).delete();
+        base.constrain(RequestMode.rmTrack);
+
+        String resp;
+        base.request(()->"1", "key1-1");
+        base.request(()->"2", "key2");
+        resp = base.request(() -> "1-2", "key1-1");
+
+        assertEquals("1-2", resp);
+
+        base = new Base("tmp/TrackStub.yml")
+                .constrain(RequestMode.rmTrack);
+        resp = base.request(()->"1", "key1-1");
+        assertEquals("1", resp);
+        resp = base.request(() -> "1-2", "key1-1");
+        assertEquals("1-2", resp);
+        resp = base.request(()->"2", "key2");
+        assertEquals("2", resp);
+
+    }
 
 }

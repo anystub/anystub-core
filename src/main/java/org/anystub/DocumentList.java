@@ -1,43 +1,39 @@
 package org.anystub;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.util.Arrays.asList;
 
-public class DocumentList {
+public class DocumentList implements DocumentListI {
 
-    private final ConcurrentLinkedQueue<Document> documents = new ConcurrentLinkedQueue<>();
     private final ConcurrentHashMap<List<String>, Document> index = new ConcurrentHashMap<>();
 
     private final Object request2lock = new Object();
 
+    @Override
     public boolean isEmpty() {
-        return documents.isEmpty();
+        return index.isEmpty();
     }
 
-    public Iterator<Document> iterator() {
-        return documents.iterator();
-    }
 
+    @Override
     public void add(Document document) {
         synchronized (request2lock) {
-            documents.add(document);
             index.putIfAbsent(document.getKey(), document);
         }
     }
 
+    @Override
     public void clear() {
-        documents.clear();
         index.clear();
     }
 
+    @Override
     public Optional<Document> getDocument(String[] keys) {
-        Document document = index.get(new ArrayList<>(asList(keys)));
+        Document document = index.get(asList(keys));
         return document != null ? Optional.of(document) : Optional.empty();
     }
 

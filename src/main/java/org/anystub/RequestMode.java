@@ -18,15 +18,14 @@ public enum RequestMode {
      */
     rmNone,
 
-   /**
-     * Use case: paranoid check.
-    *  if stub file is new it works as rmAll
-    *  * in other
+    /**
+     * Use case: very strict check.
+     * if stub file is new it allows to send all requests to a real system and record it
+     * <p>
+     * if stub-file exists
      * sending requests to real system is forbidden
-     * search in cache is forbidden
      * cache is loaded immediately.
-     * check if all calls go after each other
-     * Note: before set rmTrack you have to run rmALL
+     * use each response from cache once
      */
     rmTrack,
 
