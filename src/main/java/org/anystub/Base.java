@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -46,8 +45,8 @@ import static org.anystub.RequestMode.rmTrack;
 public class Base {
 
     private static final Logger log = Logger.getLogger(Base.class.getName());
-    private final DocumentList documentList = new DocumentList();
-    private Iterator<Document> documentListTrackIterator;
+    private final DocumentListI documentList = new DocumentList();
+    private TrackedDocumentList documentListTrackIterator;
     private final List<Document> requestHistory = new ArrayList<>();
     private final String filePath;
     /**
@@ -57,15 +56,15 @@ public class Base {
     private RequestMode requestMode = rmNew;
 
     /**
-     * creates stub by specific path.
-     * in your test you do not need to create it directly. Use org.anystub.mgmt.BaseManagerFactory.getStub()
+     * creates stub in specific path.
+     * in your test you do not need to create it directly.
+     * Use org.anystub.mgmt.BaseManagerFactory.getStub() or org.anystub.mgmt.BaseManagerFactory.locate()
      * to get stub related to your context
      *
      * <p>
      * Note: Consider using  instead
      *
-     * @param path the path to stub file if filename holds only filename (without path) then creates file in src/test/resources/anystub/
-     *             examples: new Base("./stub.yml") uses/creates file in current/work dir, new Base("stub.yml") uses/creates src/test/resources/anystub/stub.yml;
+     * @param path the path to stub file
      */
     public Base(String path) {
         this.filePath = path;
@@ -88,11 +87,15 @@ public class Base {
                     purge();
                     break;
                 case rmTrack:
-                    init();
-                    if (documentList.isEmpty()) {
+                    try {
+                        List<Document> documents = loadStub(filePath);
+                        if (documents.isEmpty()) {
+                            documentListTrackIterator = null;
+                        } else {
+                            documentListTrackIterator = new TrackedDocumentList(documents);
+                        }
+                    } catch (IOException e) {
                         documentListTrackIterator = null;
-                    } else {
-                        documentListTrackIterator = documentList.iterator();
                     }
                     break;
                 default:
@@ -490,12 +493,10 @@ public class Base {
                 return decoder.decode(storedDocument.get().getVals());
             }
         } else if (isTrackCache()) {
-            if (documentListTrackIterator.hasNext()) {
-                Document next = documentListTrackIterator.next();
-                if (next.keyEqual_to(keyGenCashed.get())) {
-                    requestHistory.add(next);
-                    return decoder.decode(next.getVals());
-                }
+            Document next = documentListTrackIterator.extractDocument(keyGenCashed.get());
+            if (next !=null && next.keyEqual_to(keyGenCashed.get())) {
+                requestHistory.add(next);
+                return decoder.decode(next.getVals());
             }
         }
 
@@ -567,25 +568,37 @@ public class Base {
         }
         synchronized (request2lock) {
             if (isNew) {
-                File file = new File(filePath);
-                try (InputStream inputStream = new FileInputStream(file);
-                     InputStreamReader input = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-                    LoaderOptions options = new LoaderOptions();
-
-                    Yaml yaml = new Yaml(new DocumentConstructor(options));
-                    Iterable<Object> load = yaml.loadAll(input);
+                try {
+                    Iterable<Document> load = loadStub(filePath);
 
                     clear();
+
                     load.forEach(d -> {
-                        if (d instanceof Document) {
-                            documentList.add((Document) d);
-                            isNew = false;
-                        }
+                        documentList.add(d);
+                        isNew = false;
                     });
                 } catch (FileNotFoundException e) {
-                    log.info(() -> String.format("stub file %s is not found: %s", file.getAbsolutePath(), e));
+                    log.info(() -> String.format("stub file %s is not found: %s", new File(filePath).getAbsolutePath(), e));
                 }
             }
+        }
+    }
+
+    private static List<Document> loadStub(String filePath) throws IOException {
+        File file = new File(filePath);
+        try (InputStream inputStream = new FileInputStream(file);
+             InputStreamReader input = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            LoaderOptions options = new LoaderOptions();
+
+            Yaml yaml = new Yaml(new DocumentConstructor(options));
+            Iterable<Object> load = yaml.loadAll(input);
+            ArrayList<Document> res = new ArrayList<>();
+            load.forEach(d-> {
+                if (d instanceof Document) {
+                    res.add((Document) d);
+                }
+            });
+            return res;
         }
     }
 
