@@ -13,14 +13,13 @@ public class TrackedDocumentList {
 
     public TrackedDocumentList(List<Document> documents) {
 
-        documents.forEach(document -> {
-            index.compute(document.getKey(), new BiWrite(document));
-        });
+        documents.forEach(document -> index.compute(document.getKey(), new BiWrite(document)));
 
     }
 
     static class BiWrite implements BiFunction<List<String>, List<Document>, List<Document>> {
         final Document document;
+
         public BiWrite(Document document) {
 
             this.document = document;
@@ -40,11 +39,11 @@ public class TrackedDocumentList {
     }
 
     static class BiExtract implements BiFunction<List<String>, List<Document>, List<Document>> {
-        public Document res = null;
+        private Document res = null;
 
         @Override
         public List<Document> apply(List<String> key, List<Document> documents) {
-            if(documents.isEmpty()) {
+            if (documents.isEmpty()) {
                 return documents;
             }
             res = documents.get(0);
