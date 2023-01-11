@@ -13,12 +13,6 @@ public class DocumentList implements DocumentListI {
     private final Object request2lock = new Object();
 
     @Override
-    public boolean isEmpty() {
-        return index.isEmpty();
-    }
-
-
-    @Override
     public void add(Document document) {
         synchronized (request2lock) {
             index.putIfAbsent(document.getKey(), document);
