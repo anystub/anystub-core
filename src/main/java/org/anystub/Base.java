@@ -56,6 +56,14 @@ public class Base {
     private RequestMode requestMode = rmNew;
 
     /**
+     * delimiter between last element in existing file and new elements
+     * stub could be manually modified so there could be several possible variants to make the yaml valid
+     * Base calculates it on load
+     * resets after the first use
+     */
+    private String firstYamlDelimiter = "";
+
+    /**
      * creates stub in specific path.
      * in your test you do not need to create it directly.
      * Use org.anystub.mgmt.BaseManagerFactory.getStub() or org.anystub.mgmt.BaseManagerFactory.locate()
@@ -434,7 +442,7 @@ public class Base {
                 decoder,
                 (t, data) -> {
                     Iterable<String> encode = encoder.encode(t);
-                    return data.apply(encode);
+                    return data.apply(encode, null);
                 },
                 keyGen);
     }
@@ -524,7 +532,12 @@ public class Base {
             return null;
         }
 
-        return inverter.invert(res, responseData -> {
+        return inverter.invert(res, (responseData, ex) -> {
+            if (ex != null) {
+                Document exceptionalDocument = put(new Document(ex, keyGenCashed.get()));
+                requestHistory.add(exceptionalDocument);
+                return res;
+            }
             ArrayList<String> values = new ArrayList<>();
             for (String responseDatum : responseData) {
                 values.add(responseDatum);
@@ -576,6 +589,11 @@ public class Base {
                     load.forEach(d -> {
                         documentList.add(d);
                         isNew = false;
+                        try {
+                            firstYamlDelimiter = StringUtil.nextYamlDelimiter(new File(filePath));
+                        } catch (IOException e) {
+                            log.severe(()-> String.format("failed to calculate yaml delimiter: %s", e.getMessage()));
+                        }
                     });
                 } catch (FileNotFoundException e) {
                     log.info(() -> String.format("stub file %s is not found: %s", new File(filePath).getAbsolutePath(), e));
@@ -626,9 +644,14 @@ public class Base {
                  OutputStreamWriter output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 
                 if (doAppend) {
-                    output.append("---\n");
-                }
+                    String delimited = "---\n";
+                    if (!firstYamlDelimiter.isEmpty()) {
+                        output.append(firstYamlDelimiter);
+                        firstYamlDelimiter = "";
+                    }
+                    output.append(delimited);
 
+                }
                 DumperOptions options = new DumperOptions();
                 options.setExplicitStart(true);
                 options.setExplicitEnd(true);
