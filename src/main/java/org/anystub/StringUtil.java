@@ -2,10 +2,12 @@ package org.anystub;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -166,6 +168,63 @@ public class StringUtil {
             return StringUtil.toCharacterString(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new UnsupportedOperationException("failed save InputStream");
+        }
+    }
+
+    public static boolean tailMatch(byte[] arr, byte[]tail) {
+        if (arr.length<tail.length) {
+            return false;
+        }
+        int iTail = tail.length -1;
+        int iArr = arr.length - 1;
+        for (;iTail>=0; iTail--, iArr--) {
+            if (tail[iTail]!=arr[iArr]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * returns yaml next
+     * @param src
+     * @return
+     * @throws IOException
+     */
+    public static String nextYamlDelimiter(File src) throws IOException {
+        try(RandomAccessFile file = new RandomAccessFile(src, "r")) {
+            long length = file.length();
+            if (length == 0) {
+                return "";
+            }
+
+            long p = Math.max(0, length - 6);
+            file.seek(p);
+            byte[] buffer = new byte[6];
+            int read = file.read(buffer, 0, 6);
+            if (read == -1) {
+                return "";
+            }
+            buffer = Arrays.copyOf(buffer, read);
+
+            // \n---\n => ""
+            byte[] n1 = new byte[]{0xA, '-', '-', '-', 0xA};
+            byte[] n2 = new byte[]{0xA, '-', '-', '-', 0xD, 0xA};
+            // \n--- => "\n"
+            byte[] n3 = new byte[]{0xA, '-', '-', '-'};
+            // ss\n => "---\n"
+            byte[] n4 = new byte[]{0xA};
+            // else -> "\n---\n"
+            if (tailMatch(buffer, n1) || tailMatch(buffer, n2)) {
+                return "";
+            }
+            if (tailMatch(buffer, n3)) {
+                return "\n";
+            }
+            if (tailMatch(buffer, n4)) {
+                return "---\n";
+            }
+            return "\n---\n";
         }
     }
 }

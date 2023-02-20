@@ -3,6 +3,7 @@ package org.anystub;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -49,6 +50,38 @@ class StringUtilTest {
     void testToArray() {
         String[] strings = StringUtil.toArray(null, "", "3");
         Assertions.assertArrayEquals(new String[]{null,"", "3"}, strings);
+    }
+
+
+    @Test
+    void testYamlDelimiter() throws IOException {
+        File file;
+        String s;
+
+        file = new File("src/test/resources/delimiter-empty.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("", s);
+        file = new File("src/test/resources/delimiter-valid.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("", s);
+        file = new File("src/test/resources/delimiter-good.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("\n", s);
+
+        file = new File("src/test/resources/delimiter-cropped.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("\n---\n", s);
+
+        file = new File("src/test/resources/delimiter-broken.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("\n---\n", s);
+
+        file = new File("src/test/resources/delimiter-full.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("---\n", s);
+
+        Assertions.assertFalse(StringUtil.tailMatch("1".getBytes(), "---\n".getBytes()));
+
     }
 
 }
