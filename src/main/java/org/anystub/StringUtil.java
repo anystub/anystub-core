@@ -183,7 +183,7 @@ public class StringUtil {
             }
         }
         return true;
-    };
+    }
 
     /**
      * returns yaml next

@@ -61,6 +61,12 @@ class StringUtilTest {
         file = new File("src/test/resources/delimiter-empty.yml");
         s = StringUtil.nextYamlDelimiter(file);
         Assertions.assertEquals("", s);
+        file = new File("src/test/resources/delimiter-valid.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("", s);
+        file = new File("src/test/resources/delimiter-good.yml");
+        s = StringUtil.nextYamlDelimiter(file);
+        Assertions.assertEquals("\n", s);
 
         file = new File("src/test/resources/delimiter-cropped.yml");
         s = StringUtil.nextYamlDelimiter(file);
@@ -73,6 +79,8 @@ class StringUtilTest {
         file = new File("src/test/resources/delimiter-full.yml");
         s = StringUtil.nextYamlDelimiter(file);
         Assertions.assertEquals("---\n", s);
+
+        Assertions.assertFalse(StringUtil.tailMatch("1".getBytes(), "---\n".getBytes()));
 
     }
 
