@@ -19,7 +19,7 @@ public class ConfigFileUtil {
     private static final ConcurrentHashMap<String, TestSettings> configs = new ConcurrentHashMap<>();
 
 
-    public ConfigFileUtil() {
+    private ConfigFileUtil() {
 
     }
     /**
