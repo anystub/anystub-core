@@ -27,6 +27,8 @@ class ConfigFileUtilTest {
         Assertions.assertArrayEquals(new String[]{"headers"}, load.headers.get());
         Assertions.assertArrayEquals(new String[]{""}, load.bodyTrigger.get());
         Assertions.assertArrayEquals(new String[]{"password: .{2,10}\\,"}, load.requestMask.get());
+
+        Assertions.assertFalse(load.testFilePrefix);
     }
 
     @Test
@@ -37,7 +39,7 @@ class ConfigFileUtilTest {
         Assertions.assertArrayEquals(new String[0], load.requestMask.get());
         Assertions.assertArrayEquals(new String[0], load.bodyMethods.get());
 
-        Assertions.assertFalse(load.testFilePrefix);
+        Assertions.assertTrue(load.testFilePrefix);
     }
 
     @Test
