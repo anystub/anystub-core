@@ -1,19 +1,5 @@
 package org.anystub;
 
-import org.anystub.mgmt.BaseManagerImpl;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.introspector.PropertyUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-
 /**
  * keeps global settings from resources/anystub/config.yml
  * file locator and Http interceptors use the setting

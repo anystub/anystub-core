@@ -24,6 +24,11 @@ public class TestSettings {
     public final String[] bodyMethods;
 
     /**
+     *
+     */
+    public final boolean testFilePrefix;
+
+    /**
      * reserved for server storage-mode
      */
     public final boolean packagePrefix = false;
@@ -32,22 +37,13 @@ public class TestSettings {
      */
     public final String stubServer = "";
 
-    private TestSettings(String[] headers, String[] bodyTrigger, String[] requestMask, String[] bodyMethods) {
+    private TestSettings(String[] headers, String[] bodyTrigger, String[] requestMask, String[] bodyMethods, boolean testFilePrefix) {
         this.headers = headers;
         this.bodyTrigger = bodyTrigger;
         this.requestMask = requestMask;
         this.bodyMethods = bodyMethods;
+        this.testFilePrefix = testFilePrefix;
     }
-
-//    public static TestSettings defaultSettings() {
-//        return TestSettings
-//                .builder()
-//                .setHeaders(new String[0])
-//                .setRequestMask(new String[0])
-//                .setBodyTrigger(new String[0])
-//                .setBodyMethods(new String[]{"POST", "PUT", "DELETE"})
-//                .build();
-//    }
 
     public static Builder builder() {
         return new Builder();
@@ -55,22 +51,13 @@ public class TestSettings {
 
     public static class Builder {
         String[] headers;
+        String[] bodyTrigger;
 
-        /**
-         * patterns, if URL match any of the trigger request body saves in stub
-         */
-         String[] bodyTrigger;
+        String[] requestMask;
 
-        /**
-         * pattern, to cut off out of the request body when saves in stub
-         * Use it to cut off variable part of the request body: ex. timestamp, random sequences, secrets
-         */
-         String[] requestMask;
-
-        /**
-         * http-methods to include request body in request key (case-sensitive)
-         */
         String[] bodyMethods;
+
+        public boolean testFilePrefix;
 
         public Builder setHeaders(String[] headers) {
             this.headers = headers;
@@ -92,13 +79,18 @@ public class TestSettings {
             return this;
         }
 
+        public Builder setTestFilePrefix(boolean testFilePrefix) {
+            this.testFilePrefix = testFilePrefix;
+            return this;
+        }
+
         public TestSettings build() {
             return new TestSettings(
                     headers,
                     bodyTrigger,
                     requestMask,
-                    bodyMethods
-            );
+                    bodyMethods,
+                    testFilePrefix);
         }
     }
 }

@@ -60,6 +60,7 @@ public class ConfigFileUtil {
                     .setRequestMask(load.requestMask.get())
                     .setBodyTrigger(load.bodyTrigger.get())
                     .setBodyMethods(load.bodyMethods.get())
+                    .setTestFilePrefix(load.testFilePrefix)
                     .build();
         });
     }
@@ -86,6 +87,7 @@ public class ConfigFileUtil {
 
     private static AnystubCfg missingConfig() {
         AnystubCfg missingConfig = new AnystubCfg();
+        missingConfig.testFilePrefix = true;
         missingConfig.bodyMethods = new StringOrArray("POST", "PUT", "DELETE");
         return missingConfig;
     }
@@ -125,7 +127,10 @@ public class ConfigFileUtil {
         public StringOrArray requestMask = new StringOrArray();
         public StringOrArray bodyMethods = new StringOrArray();
 
-        public boolean testFilePrefix = false;
+        /**
+         * whatever add test-class-name as prefix to a sub file
+         */
+        public boolean testFilePrefix = true;
 
         /**
          * reserved for server storage-mode

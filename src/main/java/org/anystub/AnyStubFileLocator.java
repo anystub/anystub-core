@@ -36,12 +36,16 @@ public class AnyStubFileLocator {
 
                 if (methodId != null) {
                     if (methodId.filename().isEmpty()) {
-                        AnyStubId classId = aClass.getDeclaredAnnotation(AnyStubId.class);
-                        String prefix = (classId == null || classId.filename().isEmpty()) ?
-                                aClass.getSimpleName() :
-                                classId.filename();
-                        filename = prefix + "-" + s.getMethodName();
-
+                        boolean testFilePrefix = ConfigFileUtil.get(methodId.config()).testFilePrefix;
+                        if (testFilePrefix) {
+                            AnyStubId classId = aClass.getDeclaredAnnotation(AnyStubId.class);
+                            String prefix = (classId == null || classId.filename().isEmpty()) ?
+                                    aClass.getSimpleName() :
+                                    classId.filename();
+                            filename = prefix + "-" + s.getMethodName();
+                        } else {
+                            filename = s.getMethodName();
+                        }
                     } else {
                         filename = methodId.filename();
                     }
@@ -52,7 +56,8 @@ public class AnyStubFileLocator {
                         String prefix = classId.filename().isEmpty() ?
                                 aClass.getSimpleName() :
                                 classId.filename();
-                        String suffix = s.getMethodName().startsWith("<") ?
+                        String suffix = s.getMethodName().startsWith("<") ||
+                                !ConfigFileUtil.get(classId.config()).testFilePrefix ?
                                 "":
                                 "-"+s.getMethodName();
                         filename = prefix + suffix;

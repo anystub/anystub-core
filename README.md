@@ -158,7 +158,8 @@ These are available settings:
 - headers: string or array - headers which need to include into request key
 - bodyMethods: POST, PUT, DELETE - list of HTTP-verbs, which include body into request key 
 - bodyTrigger: string or array - if any string is found in URL request body is included into key  
-- requestMask: "password: .{2,10}\\," - all subsequences in request body that match replace to ellipsis     
+- requestMask: "password: .{2,10}\\," - all subsequences in request body that match replace to ellipsis
+- testFilePrefix: true/false - setting to add test-class-name to every stub name
 
 
 Following reading:
