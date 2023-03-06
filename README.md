@@ -12,7 +12,7 @@ Install from Maven Central
     <dependency>
       <groupId>org.anystub</groupId>
       <artifactId>anystub</artifactId>
-      <version>0.9.0</version>
+      <version>1.1.0</version>
       <scope>test</scope>
     </dependency>
 ```
