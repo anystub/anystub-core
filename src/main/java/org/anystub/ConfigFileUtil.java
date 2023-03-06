@@ -18,6 +18,10 @@ public class ConfigFileUtil {
 
     private static final ConcurrentHashMap<String, TestSettings> configs = new ConcurrentHashMap<>();
 
+
+    public ConfigFileUtil() {
+
+    }
     /**
      * returns configuration from a given file
      * @param filename - filename inside resources/anystub/ ; missing yml extension and starting dot will be added
