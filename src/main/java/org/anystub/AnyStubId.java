@@ -12,16 +12,16 @@ import java.lang.annotation.Target;
  * Method annotations do not inherit settings from class level.
  *
  * testClass annotated, fileName not specified/filename1:
- * - method not annotated -> path includes TestClassName/filename1-MethodName
+ * - method not annotated - path includes TestClassName/filename1-MethodName
  * - method annotated:
- *   - filename not specified -> path includes TestClassName/filename1-MethodName
- *   - filename2 specified -> filename2
+ *   - filename not specified - path includes TestClassName/filename1-MethodName
+ *   - filename2 specified - filename2
  *
  * testClass Not annotated:
- * - method not annotated -> NA  (should fallback to stub.yml)
+ * - method not annotated - NA  (should fallback to stub.yml)
  * - method annotated:
- *   - filename not specified -> path includes TestClassName-MethodName
- *   - filename2 specified -> filename2
+ *   - filename not specified - path includes TestClassName-MethodName
+ *   - filename2 specified - filename2
  *
  *
  */
