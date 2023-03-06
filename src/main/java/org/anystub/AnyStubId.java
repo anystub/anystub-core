@@ -72,14 +72,10 @@ public @interface AnyStubId {
      *
      * if you specify this parameter it will work out actual file name by adding .yml in necessary
      *
-     * ```
-     * @AnyStubId
-     * ```
+     * ```@AnyStubId```
      * uses default config from test/resources/anystub/config.yml
      *
-     * ```
-     * @AnyStubId(config="special-config")
-     * ```
+     * ```@AnyStubId(config="special-config")```
      * uses default config from test/resources/anystub/special-config.yml
      *
      */
