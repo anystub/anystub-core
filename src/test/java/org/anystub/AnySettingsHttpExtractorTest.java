@@ -130,10 +130,17 @@ class AnySettingsHttpExtractorTest {
     }
 
     @Test
-    @AnySettingsHttp(bodyMethods = {"GET", "CUSTOM"})
+    @AnySettingsHttp(bodyMethods = {"GET", "CUSTOM"}, overrideGlobal = true)
     void testSpecifyHttpMethods() {
         AnySettingsHttp settingsHttp = AnySettingsHttpExtractor.httpSettings();
         Assertions.assertArrayEquals(new String[]{"GET", "CUSTOM"}, settingsHttp.bodyMethods());
+    }
+
+    @Test
+    @AnySettingsHttp(bodyMethods = {"GET", "CUSTOM", "DELETE"})
+    void testSpecifyHttpMethodsAdd() {
+        AnySettingsHttp settingsHttp = AnySettingsHttpExtractor.httpSettings();
+        Assertions.assertArrayEquals(new String[]{"GET", "CUSTOM", "DELETE", "POST", "PUT"}, settingsHttp.bodyMethods());
     }
 
 }
