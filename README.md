@@ -118,11 +118,9 @@ After running the test you can find a newly created file at src/test/resources/a
 from the name of annotated test method.
 
 ```
-request0:
-  exception: []
-  keys: worker's arg
-  values: '..."Winning isn''t everything.. It''s the"...'
-
+exception: []
+keys: worker's arg
+values: '..."Winning isn''t everything.. It''s the"...'
 ```
 
 - The wrapper allows to record responses from a real system.
@@ -134,7 +132,36 @@ request0:
 prohibit not recorded calls and etc
 
 
+## Stub naming 
+
+Anystub automatically creates stub-files where names build from class and method names annotated with `@AnyStubId`
+
+Here is the specification
+- test class annotated, filename not specified
+  - test methods not annotated or annotated without filename -> stub-name "className-methodName.yml"
+  - test method annotated and file name specified as "filename2" -> stub-name "filename2.yml"  
+- test class annotated, filename specified as "filename1"
+  - test methods not annotated or annotated without filename -> stub-name "filename1-methodName.yml"
+  - test method annotated and file name specified as "filename2" -> stub-name "filename2.yml"
+- test class not annotated
+  - test methods not annotated -> stub-name is not defined. requests fallback at test/resources/anystub/stub.yml
+  - annotated without filename -> stub-name "className-methodName.yml"
+  - test method annotated and file name specified as "filename2" -> stub-name "filename2.yml"
+
+## Configuration files
+
+You can change some aspects with configuration files. configuration files are located in "resources/anystub/" and starts from a dot.
+By default, tests load configuration from "resources/anystub/.config.yml". 
+These are available settings:
+
+- allHeaders: true/false - setting to include all headers into request key
+- headers: string or array - headers which need to include into request key
+- bodyMethods: POST, PUT, DELETE - list of HTTP-verbs, which include body into request key 
+- bodyTrigger: string or array - if any string is found in URL request body is included into key  
+- requestMask: "password: .{2,10}\\," - all subsequences in request body that match replace to ellipsis     
+
+
 Following reading:
 - Apache HttpClient, RestTemplate, JdbcTemplate, OpenApi (anystub)[https://github.com/anystub/anystub]
 - WebClient (anystub-reactive)[https://github.com/anystub/anystub-reactive]
-- System tests with spring-boot (anystub-examples)[https://github.com/anystub/anystub-examples]
+- Examples how to use anystub with spring-boot (anystub-examples)[https://github.com/anystub/anystub-examples]

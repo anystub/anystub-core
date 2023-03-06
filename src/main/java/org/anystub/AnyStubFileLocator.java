@@ -1,9 +1,10 @@
 package org.anystub;
 
-import java.lang.reflect.Method;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 
@@ -14,14 +15,14 @@ public class AnyStubFileLocator {
 
     /**
      * looks for runtime data about current stub file in the call point.
-     * If you call it in some functions it tracks stackTrace up to the first method or class annotated
-     * with @AnystubId and extracts its parameters
+     * It tracks stack-trace up to the first method or class/method annotated
+     * with @AnystubId and extracts defined parameters
      *
      *
      * @return runtime data, if no annotation found returns null
      */
     public static AnyStubId discoverFile() {
-        AnyStubId id = null;
+        AnyStubId effectiveId = null;
         String filename = null;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement s : stackTrace) {
@@ -31,42 +32,59 @@ public class AnyStubFileLocator {
             try {
                 Class<?> aClass = Class.forName(s.getClassName());
 
-                id = methodInfo(s, aClass);
+                AnyStubId methodId = methodInfo(s, aClass);
 
-                if (id != null) {
-                    filename = id.filename().isEmpty() ?
-                            s.getMethodName() :
-                            id.filename();
-                    if (GlobalSettings.testFilePrefix) {
-                        filename = aClass.getSimpleName() + filename;
-                    }
-                    break;
-                } else {
-                    id = aClass.getDeclaredAnnotation(AnyStubId.class);
-                    if (id != null) {
-                        filename = id.filename().isEmpty() ?
+                if (methodId != null) {
+                    if (methodId.filename().isEmpty()) {
+                        AnyStubId classId = aClass.getDeclaredAnnotation(AnyStubId.class);
+                        String prefix = (classId == null || classId.filename().isEmpty()) ?
                                 aClass.getSimpleName() :
-                                id.filename();
-                        break;
+                                classId.filename();
+                        filename = prefix + "-" + s.getMethodName();
+
+                    } else {
+                        filename = methodId.filename();
+                    }
+                    effectiveId = methodId;
+                } else {
+                    AnyStubId classId = aClass.getDeclaredAnnotation(AnyStubId.class);
+                    if (classId != null) {
+                        String prefix = classId.filename().isEmpty() ?
+                                aClass.getSimpleName() :
+                                classId.filename();
+                        String suffix = s.getMethodName().startsWith("<") ?
+                                "":
+                                "-"+s.getMethodName();
+                        filename = prefix + suffix;
+                        effectiveId = classId;
                     }
                 }
             } catch (ClassNotFoundException ignored) {
                 // it's acceptable that some class/method is not found
                 // need to investigate when that happens
             }
+            if (filename != null) {
+                break;
+            }
         }
-        if (id == null) {
+        if (effectiveId == null) {
             return null;
         }
+
         if (!filename.endsWith(".yml")) {
             filename += ".yml";
         }
 
-        String [] effectiveMasks = combineArrays(id.requestMasks(), GlobalSettings.globalRequestMask);
 
-        return new AnyStubIdData(filename,
-                id.requestMode(),
-                effectiveMasks);
+        TestSettings testSettings = ConfigFileUtil.get(effectiveId.config());
+        String [] effectiveMasks = combineArrays(effectiveId.requestMasks(), testSettings.requestMask);
+
+        return AnyStubIdData.builder()
+                .setFilename(filename)
+                .setRequestMode(effectiveId.requestMode())
+                .setParamMasks(effectiveMasks)
+                .setConfig(effectiveId.config())
+                .build();
     }
 
     public static String[] combineArrays(String [] one, String[] two) {
@@ -86,16 +104,13 @@ public class AnyStubFileLocator {
      * @return method's annotation
      */
     private static AnyStubId methodInfo(StackTraceElement s, Class<?> aClass) {
-        AnyStubId id=null;
-        Method methodStream = Arrays.stream(aClass.getDeclaredMethods())
+
+        return Arrays.stream(aClass.getDeclaredMethods())
                 .filter(method -> method.getName().equals(s.getMethodName()))
                 .filter(method -> method.getAnnotation(AnyStubId.class) != null)
-                .findAny().orElse(null);
-
-        if (methodStream != null) {
-            id = methodStream.getAnnotation(AnyStubId.class);
-        }
-        return id;
+                .findFirst()
+                .map(method -> method.getAnnotation(AnyStubId.class))
+                .orElse(null);
     }
 
     /**
@@ -117,6 +132,11 @@ public class AnyStubFileLocator {
         } else {
             filename = String.format("%s-%s", s, stubSuffix);
         }
-        return new AnyStubIdData(filename, s.requestMode(), s.requestMasks());
+        return AnyStubIdData.builder()
+                .setConfig(filename)
+                .setRequestMode(s.requestMode())
+                .setParamMasks(s.requestMasks())
+                .setConfig(s.config())
+                .build();
     }
 }

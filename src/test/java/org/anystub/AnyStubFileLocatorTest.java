@@ -12,7 +12,7 @@ class AnyStubFileLocatorTest {
     @Test
     @AnyStubId
     void testcase() {
-        assertEquals("testcase.yml", AnyStubFileLocator.discoverFile().filename());
+        assertEquals("AnyStubFileLocatorTest-testcase.yml", AnyStubFileLocator.discoverFile().filename());
     }
 
     @Test
@@ -23,7 +23,7 @@ class AnyStubFileLocatorTest {
 
     @Test
     void testname() {
-        assertEquals("AnyStubFileLocatorTest.yml", AnyStubFileLocator.discoverFile().filename());
+        assertEquals("AnyStubFileLocatorTest-testname.yml", AnyStubFileLocator.discoverFile().filename());
 
     }
 
@@ -40,5 +40,6 @@ class AnyStubFileLocatorTest {
 
         assertArrayEquals(new String[]{"one", "two"}, strings);
     }
+
     
 }

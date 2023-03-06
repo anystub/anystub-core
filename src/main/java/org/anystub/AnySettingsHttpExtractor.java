@@ -24,7 +24,21 @@ public class AnySettingsHttpExtractor {
      * @return settings based on annotations
      */
     public static AnySettingsHttp discoverSettings() {
-        AnySettingsHttp id = null;
+        return discoverSettingsEx().anySettingsHttp;
+    }
+
+    private static class SearchResults {
+        AnySettingsHttp anySettingsHttp;
+        String config;
+    }
+
+    /**
+     * discovers anystub settings
+     * finds an annotated method or method in annotated class
+     * @return settings - never null
+     */
+    private static SearchResults discoverSettingsEx() {
+        SearchResults searchResults = new SearchResults();
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement s : stackTrace) {
             if (s.getMethodName().startsWith("lambda$")) {
@@ -41,21 +55,44 @@ public class AnySettingsHttpExtractor {
             }
             Method methodStream = stream(aClass.getDeclaredMethods())
                     .filter(method -> method.getName().equals(s.getMethodName()))
-                    .filter(method -> method.getAnnotation(AnySettingsHttp.class) != null)
-                    .findAny().orElse(null);
+                    .filter(method -> method.getAnnotation(AnySettingsHttp.class) != null ||
+                            method.getAnnotation(AnyStubId.class) != null)
+                    .findFirst().orElse(null);
+
             if (methodStream != null) {
-                id = methodStream.getAnnotation(AnySettingsHttp.class);
+                searchResults.anySettingsHttp = methodStream.getAnnotation(AnySettingsHttp.class);
+                searchResults.config = getAnystubId(methodStream, aClass);
             }
-            if (id != null) {
+            if (searchResults.anySettingsHttp != null) {
                 break;
+
             }
-            id = aClass.getDeclaredAnnotation(AnySettingsHttp.class);
-            if (id != null) {
+            searchResults.anySettingsHttp = aClass.getDeclaredAnnotation(AnySettingsHttp.class);
+            AnyStubId declaredAnnotation = aClass.getDeclaredAnnotation(AnyStubId.class);
+            if (searchResults.anySettingsHttp == null) {
+                if (declaredAnnotation != null) {
+                    searchResults.config = declaredAnnotation.config();
+                    break;
+                }
+            } else {
+                if (declaredAnnotation != null) {
+                    searchResults.config = declaredAnnotation.config();
+                }
                 break;
             }
         }
-        return id;
+        return searchResults;
     }
+
+    private static String getAnystubId(Method methodStream, Class<?> aClass) {
+        AnyStubId res = methodStream.getAnnotation(AnyStubId.class);
+        if (res == null) {
+            res = aClass.getDeclaredAnnotation(AnyStubId.class);
+        }
+
+        return res != null ? res.config() : null;
+    }
+
 
 
     /**
@@ -72,7 +109,8 @@ public class AnySettingsHttpExtractor {
         final List<String> bodyMethods = new ArrayList<>();
 
 
-        AnySettingsHttp settings = AnySettingsHttpExtractor.discoverSettings();
+        SearchResults searchResults = AnySettingsHttpExtractor.discoverSettingsEx();
+        AnySettingsHttp settings = searchResults.anySettingsHttp;
         if(settings == null) {
             settings = MTCache.getFallbackHttpSettings();
         }
@@ -82,14 +120,14 @@ public class AnySettingsHttpExtractor {
             headers.addAll(asList(settings.headers()));
             bodyTrigger.addAll(asList(settings.bodyTrigger()));
             bodyMethods.addAll(asList(settings.bodyMethods()));
-        } else {
-            bodyMethods.addAll(asList("POST", "PUT", "DELETE"));
         }
 
-        if (settings==null || !settings.overrideGlobal()) {
-            headers.addAll(asList(GlobalSettings.globalHeaders));
-            bodyTrigger.addAll(asList(GlobalSettings.globalBodyTrigger));
-            bodyMethods.addAll(asList(GlobalSettings.globalBodyMethods));
+        if (settings == null || !settings.overrideGlobal()) {
+            String config = searchResults.config != null ? searchResults.config : "config";
+            TestSettings testSettings = ConfigFileUtil.get(config);
+            headers.addAll(asList(testSettings.headers));
+            bodyTrigger.addAll(asList(testSettings.bodyTrigger));
+            bodyMethods.addAll(asList(testSettings.bodyMethods));
         }
 
         boolean overrideGlobalF = overrideGlobal;

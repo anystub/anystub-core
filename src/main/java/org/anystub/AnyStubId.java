@@ -10,6 +10,20 @@ import java.lang.annotation.Target;
  * It could appear on test-class level or on a test method.
  * Method-annotation has priority over class annotation.
  * Method annotations do not inherit settings from class level.
+ *
+ * testClass annotated, fileName not specified/filename1:
+ * - method not annotated -> path includes TestClassName/filename1-MethodName
+ * - method annotated:
+ *   - filename not specified -> path includes TestClassName/filename1-MethodName
+ *   - filename2 specified -> filename2
+ *
+ * testClass Not annotated:
+ * - method not annotated -> NA  (should fallback to stub.yml)
+ * - method annotated:
+ *   - filename not specified -> path includes TestClassName-MethodName
+ *   - filename2 specified -> filename2
+ *
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -50,4 +64,24 @@ public @interface AnyStubId {
      * @return String[]
      */
     String[] requestMasks() default {};
+
+
+    /**
+     * Specifies a filename for test configuration
+     * default configuration is located at test/resources/anystub/config.yml
+     *
+     * if you specify this parameter it will work out actual file name by adding .yml in necessary
+     *
+     * ```
+     * @AnyStubId
+     * ```
+     * uses default config from test/resources/anystub/config.yml
+     *
+     * ```
+     * @AnyStubId(config="special-config")
+     * ```
+     * uses default config from test/resources/anystub/special-config.yml
+     *
+     */
+    String config() default "config";
 }
