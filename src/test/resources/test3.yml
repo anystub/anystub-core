@@ -9,3 +9,4 @@ requestMask:
   - test
   - test2
   - test4
+bodyMethods: [test1, test2]
