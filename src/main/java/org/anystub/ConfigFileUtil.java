@@ -129,9 +129,7 @@ public class ConfigFileUtil {
         public StringOrArray headers = new StringOrArray();
         public StringOrArray bodyTrigger = new StringOrArray();
         public StringOrArray requestMask = new StringOrArray();
-        public StringOrArray bodyMethods = new StringOrArray() {
-
-        };
+        public StringOrArray bodyMethods = new StringOrArray();
 
         /**
          * whatever add test-class-name as prefix to a sub file

@@ -67,7 +67,7 @@ class ConfigFileUtilTest {
     void testBodyMethods() {
         ConfigFileUtil.AnystubCfg load = ConfigFileUtil.load("src/test/resources/testBodyMethods.yml");
 
-//        Assertions.assertArrayEquals(new String[]{"CUSTOM"}, load.bodyMethods.get());
+        Assertions.assertArrayEquals(new String[]{"CUSTOM"}, load.bodyMethods.get());
     }
 
 
@@ -80,10 +80,22 @@ class ConfigFileUtilTest {
 
 
     @Test
-    void testLoadsConfig() throws IOException {
+    void testLoadsConfig()  {
         TestSettings load = ConfigFileUtil.get("config1");
         assertNotNull(load);
         assertArrayEquals(new String[]{"TEST"},load.headers);
+    }
+    @Test
+    void testDefaultConfig()  {
+        TestSettings load = ConfigFileUtil.get(".config.yml");
+        assertNotNull(load);
+        assertArrayEquals(new String[]{},load.headers);
+    }
+    @Test
+    void testMissingConfig()  {
+        TestSettings load = ConfigFileUtil.get(".config-missing.yml");
+        assertNotNull(load);
+        assertArrayEquals(new String[]{"POST","PUT","DELETE"},load.bodyMethods);
     }
 
 }
