@@ -35,11 +35,11 @@ class ConfigFileUtilTest {
     void testEmptyAsNone() {
         ConfigFileUtil.AnystubCfg load = ConfigFileUtil.load("src/test/resources/test2.yml");
         Assertions.assertArrayEquals(new String[0], load.headers.get());
-        Assertions.assertArrayEquals(new String[0], load.bodyTrigger.get());
-        Assertions.assertArrayEquals(new String[0], load.requestMask.get());
-        Assertions.assertArrayEquals(new String[0], load.bodyMethods.get());
+        Assertions.assertNull(load.bodyTrigger);
+        Assertions.assertArrayEquals(new String[]{"test"}, load.requestMask.get());
+        Assertions.assertArrayEquals(new String[]{"test1", "test2"}, load.bodyMethods.get());
 
-        Assertions.assertTrue(load.testFilePrefix);
+        Assertions.assertNull(load.testFilePrefix);
     }
 
     @Test
@@ -52,6 +52,8 @@ class ConfigFileUtilTest {
                 "test2",
                 "test4"
         }, load.requestMask.get());
+        Assertions.assertArrayEquals(new String[]{"test1", "test2"}, load.bodyMethods.get());
+
         load = ConfigFileUtil.load("src/test/resources/test4.yml");
         assertNotNull(load);
         load = ConfigFileUtil.load("src/test/resources/test5.yml");
@@ -78,10 +80,29 @@ class ConfigFileUtilTest {
 
 
     @Test
-    void testLoadsConfig() throws IOException {
+    void testLoadsConfig()  {
         TestSettings load = ConfigFileUtil.get("config1");
         assertNotNull(load);
         assertArrayEquals(new String[]{"TEST"},load.headers);
+    }
+    @Test
+    void testDefaultConfig()  {
+        TestSettings load = ConfigFileUtil.get(".config.yml");
+        assertNotNull(load);
+        assertArrayEquals(new String[]{},load.headers);
+    }
+    @Test
+    void testMissingConfig()  {
+        TestSettings load = ConfigFileUtil.get(".config-missing.yml");
+        assertNotNull(load);
+        assertArrayEquals(new String[]{"POST","PUT","DELETE"},load.bodyMethods);
+    }
+
+    @Test
+    void testBadConfig()  {
+        TestSettings load = ConfigFileUtil.get("");
+        assertNotNull(load);
+        assertArrayEquals(new String[]{"POST","PUT","DELETE"},load.bodyMethods);
     }
 
 }

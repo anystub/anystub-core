@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class ConfigFileUtil {
@@ -22,8 +23,10 @@ public class ConfigFileUtil {
     private ConfigFileUtil() {
 
     }
+
     /**
      * returns configuration from a given file
+     *
      * @param filename - filename inside resources/anystub/ ; missing yml extension and starting dot will be added
      * @return
      */
@@ -31,12 +34,12 @@ public class ConfigFileUtil {
         Objects.requireNonNull(filename);
         return configs.computeIfAbsent(filename, s -> {
             if (!s.startsWith(".")) {
-                s = "."+s;
+                s = "." + s;
             }
             if (!s.endsWith(".yml")) {
-                s = s+".yml";
+                s = s + ".yml";
             }
-            AnystubCfg load;
+            AnystubCfg load = new AnystubCfg();
             try (InputStream resourceAsStream = ConfigFileUtil.class.getClassLoader().getResourceAsStream("anystub/" + s)) {
 
                 load = load(resourceAsStream);
@@ -44,7 +47,6 @@ public class ConfigFileUtil {
                 Logger.getLogger(ConfigFileUtil.class.getName())
                         .finest(() -> String.format("can't load default properties from '%s': %s", filename, ex.getMessage()));
 
-                load = missingConfig();
             } catch (YAMLException ex) {
                 java.util.function.Supplier<String> runnable = () -> String.format("can't load default properties from '%s': %s", filename, ex.getMessage());
 
@@ -55,77 +57,75 @@ public class ConfigFileUtil {
                     Logger.getLogger(ConfigFileUtil.class.getName())
                             .warning(runnable);
                 }
-
-                load = missingConfig();
             }
             return TestSettings
                     .builder()
-                    .setHeaders(load.headers.get())
-                    .setRequestMask(load.requestMask.get())
-                    .setBodyTrigger(load.bodyTrigger.get())
-                    .setBodyMethods(load.bodyMethods.get())
-                    .setTestFilePrefix(load.testFilePrefix)
+                    .setHeaders(ifNull(load.headers, StringOrArray::get, new String[0]))
+                    .setRequestMask(ifNull(load.requestMask, StringOrArray::get, new String[0]))
+                    .setBodyTrigger(ifNull(load.bodyTrigger, StringOrArray::get, new String[0]))
+                    .setBodyMethods(ifNull(load.bodyMethods,
+                            v -> v.get().length == 0 ?
+                                    new String[]{"POST", "PUT", "DELETE"} :
+                                    v.get(), new String[0]))
+                    .setTestFilePrefix(ifNull(load.testFilePrefix, v -> v, true))
                     .build();
         });
     }
 
+    static <T, R> R ifNull(T v, Function<T, R> f, R def) {
+        if (v == null) {
+            return def;
+        }
+        return f.apply(v);
+    }
+
     /**
      * loads configuration from given yml file
+     *
      * @param s - full path
-     * @return
+     * @return config - only present values are defined. Values which missing in the config are null
+     * if config is not present or invalid all values are null
      */
     public static AnystubCfg load(String s) {
         try (InputStream input = new FileInputStream(s)) {
             return load(input);
-        }catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ConfigFileUtil.class.getName())
                     .finest(() -> String.format("can't load default properties from %s: %s", s, ex.getMessage()));
         } catch (YAMLException ex) {
             Logger.getLogger(ConfigFileUtil.class.getName())
-                    .warning(()->String.format("can't load default properties from %s: %s", s, ex.getMessage()));
+                    .warning(() -> String.format("can't load default properties from %s: %s", s, ex.getMessage()));
         }
-
-
-        return missingConfig();
+        return new AnystubCfg();
     }
 
-    private static AnystubCfg missingConfig() {
-        AnystubCfg missingConfig = new AnystubCfg();
-        missingConfig.testFilePrefix = true;
-        missingConfig.bodyMethods = new StringOrArray("POST", "PUT", "DELETE");
-        return missingConfig;
-    }
+    /**
+     * loads configuration from given yml file
+     *
+     * @param input - stream of the configuration file
+     * @return config - only present values are defined. Values which missing in the config are null
+     * if config is not present or invalid all values are null
+     * <p>
+     * note for StringOrArray properties:
+     * - if property not defined in config - it is defined empty
+     * - if property defined in config but no values - it is set to null
+     */
     public static AnystubCfg load(InputStream input) {
-            LoaderOptions loaderOptions = new LoaderOptions();
-            Constructor constructor = new Constructor(loaderOptions);
-            PropertyUtils propertyUtils = new PropertyUtils();
-            propertyUtils.setSkipMissingProperties(true);
-            constructor.setPropertyUtils(propertyUtils);
-            Yaml yaml = new Yaml(constructor);
-            AnystubCfg anystubCfg = yaml.loadAs(input, AnystubCfg.class);
-            if (anystubCfg == null) {
-                return new AnystubCfg();
-            }
-
-            if(anystubCfg.headers == null) {
-                anystubCfg.headers = new StringOrArray();
-            }
-            if(anystubCfg.bodyTrigger == null) {
-                anystubCfg.bodyTrigger = new StringOrArray();
-            }
-            if(anystubCfg.requestMask == null) {
-                anystubCfg.requestMask = new StringOrArray();
-            }
-            if(anystubCfg.bodyMethods == null) {
-                anystubCfg.bodyMethods = new StringOrArray();
-            }
-
-            return anystubCfg;
+        LoaderOptions loaderOptions = new LoaderOptions();
+        Constructor constructor = new Constructor(loaderOptions);
+        PropertyUtils propertyUtils = new PropertyUtils();
+        propertyUtils.setSkipMissingProperties(true);
+        constructor.setPropertyUtils(propertyUtils);
+        Yaml yaml = new Yaml(constructor);
+        AnystubCfg anystubCfg = yaml.loadAs(input, AnystubCfg.class);
+        if (anystubCfg == null) {
+            return new AnystubCfg();
+        }
+        return anystubCfg;
     }
 
 
-
-    public static class AnystubCfg {
+    static class AnystubCfg {
         public StringOrArray headers = new StringOrArray();
         public StringOrArray bodyTrigger = new StringOrArray();
         public StringOrArray requestMask = new StringOrArray();
@@ -134,33 +134,31 @@ public class ConfigFileUtil {
         /**
          * whatever add test-class-name as prefix to a sub file
          */
-        public boolean testFilePrefix = true;
+        public Boolean testFilePrefix;
 
         /**
          * reserved for server storage-mode
          */
-        public boolean packagePrefix = false;
+        public final Boolean packagePrefix = false;
         /**
          * reserved for server storage-mode
          */
-        public String stubServer = "";
+        public final String stubServer = "";
 
         @Override
         public String toString() {
             return "AnystubCfg{" +
-                    ", headers=" + Arrays.toString(headers.get()) +
-                    ", bodyTrigger=" + Arrays.toString(bodyTrigger.get()) +
-                    ", requestMask=" + Arrays.toString(requestMask.get()) +
-                    ", bodyMethods=" + Arrays.toString(bodyMethods.get()) +
+                    "headers=" + headers +
+                    ", bodyTrigger=" + bodyTrigger +
+                    ", requestMask=" + requestMask +
+                    ", bodyMethods=" + bodyMethods +
                     ", testFilePrefix=" + testFilePrefix +
-                    ", packagePrefix=" + packagePrefix +
-                    ", stubServer='" + stubServer + '\'' +
                     '}';
         }
     }
 
     public static class StringOrArray {
-        String[] data;
+        final String[] data;
 
         public String[] get() {
             return data;
@@ -169,14 +167,27 @@ public class ConfigFileUtil {
         public StringOrArray() {
             this.data = new String[0];
         }
+
         public StringOrArray(String data) {
+            if (data == null) {
+                this.data = new String[0];
+                return;
+            }
+
+
             this.data = new String[]{data};
         }
+
+        public StringOrArray(String... data) {
+            this.data = data;
+        }
+
         public StringOrArray(String data,
                              String data1) {
             this.data = new String[]{data,
                     data1};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String dataN) {
@@ -184,6 +195,7 @@ public class ConfigFileUtil {
                     data1,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -193,6 +205,7 @@ public class ConfigFileUtil {
                     data2,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -204,6 +217,7 @@ public class ConfigFileUtil {
                     data3,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -217,6 +231,7 @@ public class ConfigFileUtil {
                     data4,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -232,6 +247,7 @@ public class ConfigFileUtil {
                     data5,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -249,6 +265,7 @@ public class ConfigFileUtil {
                     data6,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -268,6 +285,7 @@ public class ConfigFileUtil {
                     data7,
                     dataN};
         }
+
         public StringOrArray(String data,
                              String data1,
                              String data2,
@@ -289,5 +307,14 @@ public class ConfigFileUtil {
                     data8,
                     dataN};
         }
+
+        @Override
+        public String toString() {
+            return "StringOrArray{" +
+                    "data=" + Arrays.toString(data) +
+                    '}';
+        }
     }
+
+
 }

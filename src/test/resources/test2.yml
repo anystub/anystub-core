@@ -1,5 +1,5 @@
-allHeaders:
-headers:
+headersNotDefined:
 bodyTrigger:
-requestMask:
-bodyMethods:
+requestMask: test
+bodyMethods: [test1 , test2]
+
