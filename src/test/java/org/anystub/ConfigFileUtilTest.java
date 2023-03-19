@@ -98,4 +98,11 @@ class ConfigFileUtilTest {
         assertArrayEquals(new String[]{"POST","PUT","DELETE"},load.bodyMethods);
     }
 
+    @Test
+    void testBadConfig()  {
+        TestSettings load = ConfigFileUtil.get("");
+        assertNotNull(load);
+        assertArrayEquals(new String[]{"POST","PUT","DELETE"},load.bodyMethods);
+    }
+
 }

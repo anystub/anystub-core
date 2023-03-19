@@ -139,11 +139,11 @@ public class ConfigFileUtil {
         /**
          * reserved for server storage-mode
          */
-        public Boolean packagePrefix = false;
+        public final Boolean packagePrefix = false;
         /**
          * reserved for server storage-mode
          */
-        public String stubServer = "";
+        public final String stubServer = "";
 
         @Override
         public String toString() {
