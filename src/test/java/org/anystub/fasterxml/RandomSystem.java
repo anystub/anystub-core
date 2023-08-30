@@ -2,7 +2,6 @@ package org.anystub.fasterxml;
 
 
 import org.anystub.RandomGenerator;
-import org.anystub.Supplier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

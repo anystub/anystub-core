@@ -131,32 +131,6 @@ public class Base {
         return document;
     }
 
-    /**
-     * Creates and keeps a new Document in cache.
-     * treats to keysAndValue[0..count-1] as keys of new Document, the last element as the value of the Document
-     *
-     * @param keysAndValue keys for request2
-     * @return new Document
-     * @deprecated use Document.fromArray
-     */
-    @Deprecated
-    public Document put(String... keysAndValue) {
-        return put(Document.fromArray(keysAndValue));
-    }
-
-    /**
-     * Creates and keeps a new Document in cache.
-     * Document includes request and exception as a response.
-     *
-     * @param ex   exception is kept in document
-     * @param keys key for the document
-     * @return inserted document
-     * @deprecated
-     */
-    @Deprecated
-    public Document put(Throwable ex, String... keys) {
-        return put(new Document(ex, keys));
-    }
 
     /**
      * Finds document with given keys.
