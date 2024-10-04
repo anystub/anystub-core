@@ -30,7 +30,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          server-id: server
+          server-id: central
           server-username: SERVER_USERNAME
           server-password: SERVER_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
