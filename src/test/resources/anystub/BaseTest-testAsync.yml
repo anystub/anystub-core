@@ -1,7 +1,7 @@
 exception: []
 keys: testAsync
-values: testX
+values: test
 ---
 exception: []
 keys: testAsync
-values: test
+values: testX
